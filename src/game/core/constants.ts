@@ -1,0 +1,13 @@
+export const GAME_WIDTH = 1280;
+export const GAME_HEIGHT = 720;
+export const FLOOR_COUNT = 10;
+export const SLOT_SIDES = ['left', 'right'] as const;
+export const STARTING_MANA = 140;
+export const STARTING_ESSENCE = 0;
+export const STARTING_HEART_HP = 20;
+export const TOWER_X = 620;
+export const TOWER_TOP = 64;
+export const FLOOR_HEIGHT = 58;
+export const PATH_WIDTH = 112;
+export const ROOM_RANGE_SCALE = 1;
+export const WAVE_DELAY_MS = 820;
