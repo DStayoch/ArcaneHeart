@@ -42,6 +42,22 @@ export class BuildSystem {
     return true;
   }
 
+  moveRoom(room: Room, targetSlot: BuildSlot, slots: BuildSlot[]) {
+    if (targetSlot.model.roomId && targetSlot.model.id !== room.slotId) return false;
+    const oldSlot = slots.find((candidate) => candidate.model.id === room.slotId);
+    if (oldSlot) {
+      oldSlot.model.roomId = undefined;
+      oldSlot.clearRoomLabel();
+    }
+    targetSlot.model.roomId = room.def.id;
+    targetSlot.setRoomLabel(room.def.icon, room.def.color);
+    room.slotId = targetSlot.model.id;
+    room.floor = targetSlot.model.floor;
+    this.scene.tweens.add({ targets: room, x: targetSlot.x, y: targetSlot.y, duration: 170, ease: 'Sine.easeOut' });
+    this.ping(targetSlot.x, targetSlot.y, room.def.color);
+    return true;
+  }
+
   private ping(x: number, y: number, color: number) {
     const ring = this.scene.add.circle(x, y, 20, color, 0.2).setStrokeStyle(2, color, 0.9);
     this.scene.tweens.add({ targets: ring, scale: 2.2, alpha: 0, duration: 420, onComplete: () => ring.destroy() });

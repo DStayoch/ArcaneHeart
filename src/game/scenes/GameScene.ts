@@ -47,6 +47,8 @@ export class GameScene extends Phaser.Scene {
   private audio!: AudioSystem;
   private fx!: VisualEffectsSystem;
   private selectedRoom?: Room;
+  private draggingRoom?: Room;
+  private dragOrigin?: { x: number; y: number };
   private ready = false;
 
   constructor() {
@@ -184,17 +186,67 @@ export class GameScene extends Phaser.Scene {
   }
 
   private attachRoomInput(room: Room) {
+    this.input.setDraggable(room);
     room.on('pointerdown', () => {
+      if (this.draggingRoom) return;
       this.selectedRoom = room;
       this.roomInfo.refresh(room);
       this.buildMenu.close();
     });
+    room.on('dragstart', () => {
+      if (this.state.waveActive) return;
+      this.draggingRoom = room;
+      this.dragOrigin = { x: room.x, y: room.y };
+      room.setDepth(300);
+      this.tower.slots.forEach((slot) => {
+        if (!slot.model.roomId || slot.model.id === room.slotId) slot.setPreview(true);
+      });
+    });
+    room.on('drag', (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+      if (this.state.waveActive || this.draggingRoom !== room) return;
+      room.setPosition(dragX, dragY);
+    });
+    room.on('dragend', () => {
+      if (this.state.waveActive || this.draggingRoom !== room) {
+        this.cancelRoomDrag(room);
+        return;
+      }
+      const slot = this.findDropSlot(room);
+      if (slot && this.build.moveRoom(room, slot, this.tower.slots)) {
+        this.selectedRoom = room;
+        this.roomInfo.refresh(room);
+      } else {
+        this.cancelRoomDrag(room);
+      }
+      room.setDepth(0);
+      this.tower.slots.forEach((candidate) => candidate.setPreview(false));
+      this.draggingRoom = undefined;
+      this.dragOrigin = undefined;
+    });
     room.on('pointerover', () => {
       const def = roomDefinitions[room.def.id];
       const fusion = room.activeFusion ? `\n\nMERGED: ${room.activeFusion.name}\n${room.activeFusion.description}` : room.mergedInto ? '\n\nAbsorbed into a merged room.' : '';
-      this.tooltip.show(room.x + 58, room.y - 22, `${def.name}\nLevel ${room.level} | ${def.cost} Mana base\n${def.effect}\n${def.personality}${fusion}`);
+      const moveHint = this.state.waveActive ? '\nMove: disabled during waves.' : '\nDrag to move this room to another empty slot.';
+      this.tooltip.show(room.x + 58, room.y - 22, `${def.name}\nLevel ${room.level} | ${def.cost} Mana base\n${def.effect}\n${def.personality}${fusion}${moveHint}`);
     });
     room.on('pointerout', () => this.tooltip.hide());
+  }
+
+  private findDropSlot(room: Room) {
+    return this.tower.slots
+      .filter((slot) => !slot.model.roomId || slot.model.id === room.slotId)
+      .map((slot) => ({ slot, distance: Phaser.Math.Distance.Between(room.x, room.y, slot.x, slot.y) }))
+      .filter((entry) => entry.distance < 58)
+      .sort((a, b) => a.distance - b.distance)[0]?.slot;
+  }
+
+  private cancelRoomDrag(room: Room) {
+    if (this.dragOrigin) {
+      this.tweens.add({ targets: room, x: this.dragOrigin.x, y: this.dragOrigin.y, duration: 160, ease: 'Sine.easeOut' });
+    }
+    this.tower.slots.forEach((candidate) => candidate.setPreview(false));
+    this.draggingRoom = undefined;
+    this.dragOrigin = undefined;
   }
 
   private completeWave() {

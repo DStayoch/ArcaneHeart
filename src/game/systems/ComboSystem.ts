@@ -65,10 +65,6 @@ export class ComboSystem {
   }
 
   private drawFusion(combo: ComboDefinition, rooms: Room[], color: number) {
-    this.lines.lineStyle(5, color, 0.42);
-    for (let i = 0; i < rooms.length - 1; i += 1) {
-      this.lines.lineBetween(rooms[i].x, rooms[i].y, rooms[i + 1].x, rooms[i + 1].y);
-    }
     const center = rooms.reduce((acc, room) => ({ x: acc.x + room.x / rooms.length, y: acc.y + room.y / rooms.length }), { x: 0, y: 0 });
     const sigil = this.scene.add.star(center.x, center.y, combo.roomIds.length >= 3 ? 8 : 6, 7, 15, color, 0.78).setStrokeStyle(2, 0xfff0bd, 0.9).setDepth(110);
     sigil.setInteractive({ useHandCursor: true });

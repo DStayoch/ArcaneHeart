@@ -69,6 +69,7 @@ export class RoomSystem {
   private actFusion(room: Room, enemies: Enemy[]) {
     const fusion = room.activeFusion;
     if (!fusion) return;
+    if (!this.state.waveActive) return;
     const target = this.targeting.findTarget(room, enemies);
     switch (fusion.id) {
       case 'lunar_brambles': {
@@ -141,7 +142,8 @@ export class RoomSystem {
         return;
       }
       case 'solar_orchard': {
-        const victims = enemies.filter((enemy) => enemy.alive).sort((a, b) => b.progress - a.progress).slice(0, 7);
+        const victims = this.targeting.nearbyEnemies(room, enemies, room.range() + 70).sort((a, b) => b.progress - a.progress).slice(0, 7);
+        if (!victims.length) return;
         victims.forEach((enemy) => {
           enemy.applyDamage(room.damage() * 1.25 + 14, ['Fire', 'Root', 'Moon'], room.id);
           enemy.applyStatus('burning', 2400, 5);

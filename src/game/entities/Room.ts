@@ -83,13 +83,13 @@ export class Room extends Phaser.GameObjects.Container {
     this.setFusionActive(role !== 'none', color);
     if (role === 'anchor' && combo) {
       this.setAlpha(1);
-      this.setScale(1.05);
+      this.setScale(1.12);
       this.text.setText(`${combo.name.split(' ').map((word) => word[0]).join('')} ${this.level}`);
       this.bg.setFillStyle(color, 0.92).setStrokeStyle(4, 0xffffff, 1);
     } else if (role === 'contributor') {
-      this.setAlpha(0.46);
-      this.setScale(0.82);
-      this.text.setText('Fused');
+      this.setAlpha(0.22);
+      this.setScale(0.44);
+      this.text.setText('Merged');
       this.bg.setFillStyle(color, 0.32).setStrokeStyle(2, color, 0.9);
     } else {
       this.setAlpha(1);
