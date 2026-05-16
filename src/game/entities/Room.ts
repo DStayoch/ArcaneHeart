@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { roomDefinitions } from '../data/rooms';
-import type { RoomDefinition, RoomId, TargetPriority } from '../core/types';
+import type { ComboDefinition, RoomDefinition, RoomId, TargetPriority } from '../core/types';
 
 export class Room extends Phaser.GameObjects.Container {
   readonly id: string;
@@ -10,6 +10,8 @@ export class Room extends Phaser.GameObjects.Container {
   cooldownRemaining = 0;
   slotId: string;
   floor: number;
+  activeFusion?: ComboDefinition;
+  mergedInto?: string;
   private bg: Phaser.GameObjects.Rectangle;
   private text: Phaser.GameObjects.Text;
   private model: Phaser.GameObjects.Container;
@@ -72,6 +74,28 @@ export class Room extends Phaser.GameObjects.Container {
     if (this.fusionGlow) {
       this.fusionGlow.setFillStyle(color, active ? 0.26 : 0);
       this.fusionGlow.setVisible(active);
+    }
+  }
+
+  setFusionRole(combo: ComboDefinition | undefined, role: 'anchor' | 'contributor' | 'none', color = 0xbdf4ff) {
+    this.activeFusion = role === 'anchor' ? combo : undefined;
+    this.mergedInto = role === 'contributor' ? combo?.id : undefined;
+    this.setFusionActive(role !== 'none', color);
+    if (role === 'anchor' && combo) {
+      this.setAlpha(1);
+      this.setScale(1.05);
+      this.text.setText(`${combo.name.split(' ').map((word) => word[0]).join('')} ${this.level}`);
+      this.bg.setFillStyle(color, 0.92).setStrokeStyle(4, 0xffffff, 1);
+    } else if (role === 'contributor') {
+      this.setAlpha(0.46);
+      this.setScale(0.82);
+      this.text.setText('Fused');
+      this.bg.setFillStyle(color, 0.32).setStrokeStyle(2, color, 0.9);
+    } else {
+      this.setAlpha(1);
+      this.setScale(1);
+      this.text.setText(`Lv ${this.level}`);
+      this.bg.setFillStyle(this.def.color, 0.88).setStrokeStyle(this.level >= 3 ? 4 : this.level === 2 ? 3 : 2, this.level >= 3 ? 0xffffff : 0xfff0bd, 0.9);
     }
   }
 

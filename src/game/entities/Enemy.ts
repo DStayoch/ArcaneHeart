@@ -25,14 +25,16 @@ export class Enemy extends Phaser.GameObjects.Container {
   private path: PathPoint[];
   private elite: boolean;
   private speedScale: number;
+  private armorScale: number;
 
-  constructor(scene: Phaser.Scene, enemyId: EnemyId, path: PathPoint[], elite = false, healthScale = 1, speedScale = 1) {
+  constructor(scene: Phaser.Scene, enemyId: EnemyId, path: PathPoint[], elite = false, healthScale = 1, speedScale = 1, armorScale = 0) {
     const start = path[0];
     super(scene, start.x, start.y);
     this.def = enemyDefinitions[enemyId];
     this.path = path;
     this.elite = elite;
     this.speedScale = speedScale;
+    this.armorScale = armorScale;
     this.maxHp = this.def.hp * healthScale * (elite ? 1.75 : 1);
     this.hp = this.maxHp;
     const radius = this.def.boss ? 22 : elite ? 17 : 13;
@@ -68,7 +70,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     if (this.hasStatus('frail')) multiplier *= 1.28;
     if (this.hasStatus('marked')) multiplier *= 1.18;
     const collectorArmor = this.def.id === 'curse_collector' ? Math.floor(repeatedHits / 3) : 0;
-    const final = Math.max(1, amount * multiplier - (this.def.armor ?? 0) - collectorArmor);
+    const final = Math.max(1, amount * multiplier - (this.def.armor ?? 0) - this.armorScale - collectorArmor);
     this.hp -= final;
     this.scene.tweens.add({ targets: this.body, scaleX: 1.25, scaleY: 1.25, yoyo: true, duration: 70 });
     if (this.hp <= 0) this.alive = false;

@@ -24,15 +24,19 @@ export class RoomSystem {
     if (this.state.paused) return;
     const scaled = deltaMs * this.state.speed;
     rooms.forEach((room) => {
+      if (room.mergedInto) return;
       room.cooldownRemaining -= scaled;
       if (room.cooldownRemaining > 0) return;
       this.act(room, enemies);
       room.cooldownRemaining = room.cooldown() * this.adjacentSpeedBoost(room, rooms);
     });
-    this.updateSolarOrchard(scaled, enemies);
   }
 
   private act(room: Room, enemies: Enemy[]) {
+    if (room.activeFusion) {
+      this.actFusion(room, enemies);
+      return;
+    }
     if (room.def.id === 'cauldron_nursery') {
       if (!this.state.waveActive) return;
       this.economy.addMana(room.level >= 3 ? 8 : 4);
@@ -62,20 +66,83 @@ export class RoomSystem {
     if (this.state.activeCombos.some((combo) => combo.id === 'spicy_stew_economy') && room.def.id === 'fire_imp_kitchen' && chance(0.2)) this.economy.addMana(2);
   }
 
+  private actFusion(room: Room, enemies: Enemy[]) {
+    const fusion = room.activeFusion;
+    if (!fusion) return;
+    const target = this.targeting.findTarget(room, enemies);
+    switch (fusion.id) {
+      case 'lunar_brambles': {
+        if (!target) return;
+        target.applyDamage(room.damage() * 1.25, ['Root', 'Moon'], room.id);
+        target.applyStatus('snared', 2400, 0.38);
+        target.applyStatus('marked', 1600, 0.18);
+        this.targeting.nearbyEnemies(target, enemies, 115).filter((enemy) => enemy !== target).slice(0, 2).forEach((enemy) => {
+          enemy.applyDamage(room.damage() * 0.62, ['Root', 'Moon'], room.id);
+          enemy.applyStatus('snared', 1200, 0.22);
+        });
+        this.audio?.play('combo');
+        return;
+      }
+      case 'prismatic_fireflies': {
+        if (!target) return;
+        this.projectiles.fire(room, target, room.damage() * 1.15, [fusion]);
+        this.statuses.applyRoomEffects(room, target, [fusion]);
+        this.targeting.nearbyEnemies(target, enemies, 130).slice(0, 3).forEach((enemy) => enemy.applyStatus('burning', 2200, 5));
+        this.audio?.playRoom('mirror_hatchery');
+        return;
+      }
+      case 'funeral_chime': {
+        const victims = this.targeting.nearbyEnemies(room, enemies, room.range() + 35);
+        victims.forEach((enemy) => {
+          enemy.applyDamage(room.damage() * 0.85 + 5, ['Shadow', 'Moon'], room.id);
+          enemy.applyStatus('snared', 1700, 0.26);
+          enemy.applyStatus('frail', 3100, 0.32);
+        });
+        this.audio?.playRoom('grave_moth_chapel');
+        return;
+      }
+      case 'time_grown_thorns': {
+        if (!target) return;
+        target.rewind(0.095);
+        target.applyDamage(room.damage() * 1.4 + 8, ['Root', 'Time'], room.id);
+        target.applyStatus('snared', 2600, 0.42);
+        this.targeting.nearbyEnemies(target, enemies, 80).forEach((enemy) => enemy.applyDamage(7, ['Root', 'Time'], room.id));
+        this.audio?.playRoom('clockwork_orrery');
+        return;
+      }
+      case 'echo_lightning': {
+        if (!target) return;
+        this.projectiles.fire(room, target, room.damage() * 1.2, [fusion]);
+        this.audio?.playRoom('storm_harp');
+        return;
+      }
+      case 'spicy_stew_economy': {
+        if (this.state.waveActive) this.economy.addMana(room.level >= 3 ? 10 : 6);
+        if (target) {
+          target.applyDamage(room.damage() * 0.95 + 6, ['Fire', 'Alchemy'], room.id);
+          this.targeting.nearbyEnemies(target, enemies, 85).forEach((enemy) => enemy.applyStatus('burning', 2800, 6));
+        }
+        this.audio?.playRoom('cauldron_nursery');
+        return;
+      }
+      case 'solar_orchard': {
+        const victims = enemies.filter((enemy) => enemy.alive).sort((a, b) => b.progress - a.progress).slice(0, 7);
+        victims.forEach((enemy) => {
+          enemy.applyDamage(room.damage() * 1.25 + 14, ['Fire', 'Root', 'Moon'], room.id);
+          enemy.applyStatus('burning', 2400, 5);
+          enemy.applyStatus('marked', 1800, 0.2);
+        });
+        this.audio?.play('combo');
+        return;
+      }
+      default:
+        break;
+    }
+  }
+
   private adjacentSpeedBoost(room: Room, rooms: Room[]) {
     const boosted = rooms.some((other) => other !== room && other.def.id === 'moon_bell' && Math.abs(other.floor - room.floor) <= 1);
     return boosted ? 0.9 : 1;
   }
 
-  private updateSolarOrchard(deltaMs: number, enemies: Enemy[]) {
-    if (!this.state.activeCombos.some((combo) => combo.id === 'solar_orchard')) return;
-    this.solarTimer -= deltaMs;
-    if (this.solarTimer > 0) return;
-    this.solarTimer = 3600;
-    enemies.filter((enemy) => enemy.alive).slice(0, 5).forEach((enemy) => {
-      enemy.applyDamage(18, ['Fire', 'Root', 'Moon'], 'solar-orchard');
-      enemy.applyStatus('burning', 1800, 4);
-    });
-    this.audio?.play('combo');
-  }
 }

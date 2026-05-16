@@ -108,6 +108,7 @@ export class GameScene extends Phaser.Scene {
     this.roomInfo = new RoomInfoPanel(this);
     this.mutationPanel = new MutationChoicePanel(this);
     this.buildMenu.onBuild = (slot, roomId) => {
+      this.audio.unlock();
       const room = this.build.build(slot, roomId);
       if (room) this.attachRoomInput(room);
       if (room) this.audio.play('build');
@@ -119,6 +120,7 @@ export class GameScene extends Phaser.Scene {
     this.buildMenu.onHover = (x, y, text) => this.tooltip.show(x, y, text);
     this.buildMenu.onOut = () => this.tooltip.hide();
     this.roomInfo.onUpgrade = (room) => {
+      this.audio.unlock();
       if (this.build.upgrade(room)) {
         this.audio.play('build');
         this.fx.roomUpgraded(room);
@@ -145,13 +147,16 @@ export class GameScene extends Phaser.Scene {
       slot.on('pointerout', () => slot.setPreview(false));
     });
     this.hud.startButton.on('pointerdown', () => {
+      this.audio.unlock();
       if (this.waves.startWave()) this.audio.play(this.state.wave === 10 ? 'boss' : 'wave');
     });
     this.hud.pauseButton.on('pointerdown', () => {
+      this.audio.unlock();
       this.state.paused = !this.state.paused;
       this.refreshUi();
     });
     this.hud.speedButton.on('pointerdown', () => {
+      this.audio.unlock();
       this.state.speed = this.state.speed === 1 ? 2 : 1;
       this.refreshUi();
     });
@@ -186,7 +191,8 @@ export class GameScene extends Phaser.Scene {
     });
     room.on('pointerover', () => {
       const def = roomDefinitions[room.def.id];
-      this.tooltip.show(room.x + 58, room.y - 22, `${def.name}\nLevel ${room.level} | ${def.cost} Mana base\n${def.effect}\n${def.personality}`);
+      const fusion = room.activeFusion ? `\n\nMERGED: ${room.activeFusion.name}\n${room.activeFusion.description}` : room.mergedInto ? '\n\nAbsorbed into a merged room.' : '';
+      this.tooltip.show(room.x + 58, room.y - 22, `${def.name}\nLevel ${room.level} | ${def.cost} Mana base\n${def.effect}\n${def.personality}${fusion}`);
     });
     room.on('pointerout', () => this.tooltip.hide());
   }

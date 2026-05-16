@@ -19,14 +19,16 @@ export class ComboSystem {
     this.lines.clear();
     this.sigils.forEach((sigil) => sigil.destroy());
     this.sigils = [];
-    rooms.forEach((room) => room.setFusionActive(false));
-    for (const combo of comboDefinitions) {
-      const matched = combo.roomIds.map((id) => rooms.filter((room) => room.def.id === id));
-      if (matched.every((set) => set.length > 0) && this.hasAdjacentChain(matched.flat())) {
+    const used = new Set<Room>();
+    rooms.forEach((room) => room.setFusionRole(undefined, 'none'));
+    const orderedCombos = [...comboDefinitions].sort((a, b) => b.roomIds.length - a.roomIds.length);
+    for (const combo of orderedCombos) {
+      const fusionRooms = this.findFusionRooms(combo, rooms.filter((room) => !used.has(room)));
+      if (fusionRooms) {
         active.push(combo);
         const color = combo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff;
-        const fusionRooms = matched.flat();
-        fusionRooms.forEach((room) => room.setFusionActive(true, color));
+        fusionRooms.forEach((room) => used.add(room));
+        fusionRooms.forEach((room, index) => room.setFusionRole(combo, index === 0 ? 'anchor' : 'contributor', color));
         this.drawFusion(combo, fusionRooms, color);
         if (!this.previous.has(combo.id)) this.fx?.fusionActivated(combo, fusionRooms);
       }
@@ -42,6 +44,24 @@ export class ComboSystem {
       }
     }
     return rooms.length <= 1;
+  }
+
+  private findFusionRooms(combo: ComboDefinition, rooms: Room[]) {
+    const candidates = combo.roomIds.map((id) => rooms.filter((room) => room.def.id === id && !room.mergedInto));
+    if (candidates.some((set) => set.length === 0)) return undefined;
+    const picked: Room[] = [];
+    const search = (index: number): Room[] | undefined => {
+      if (index >= candidates.length) return this.hasAdjacentChain(picked) ? [...picked] : undefined;
+      for (const room of candidates[index]) {
+        if (picked.includes(room)) continue;
+        picked.push(room);
+        const result = search(index + 1);
+        if (result) return result;
+        picked.pop();
+      }
+      return undefined;
+    };
+    return search(0);
   }
 
   private drawFusion(combo: ComboDefinition, rooms: Room[], color: number) {

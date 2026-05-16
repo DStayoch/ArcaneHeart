@@ -9,6 +9,13 @@ export class AudioSystem {
 
   constructor(private scene: Phaser.Scene) {}
 
+  unlock() {
+    this.ensureContext();
+    if (!this.ctx) return;
+    void this.ctx.resume();
+    this.chime([660], this.ctx.currentTime, 'sine', 0.025, 0.01);
+  }
+
   play(cue: AudioCue) {
     this.ensureContext();
     const now = this.ctx?.currentTime ?? 0;
