@@ -49,18 +49,12 @@ export class TowerMapSystem {
   }
 
   private drawHeart(x: number, y: number) {
-    const heart = this.scene.add.graphics();
-    heart.fillStyle(0xff5da5, 0.95);
-    heart.lineStyle(3, 0xffe9a4, 1);
-    heart.beginPath();
-    heart.moveTo(x, y + 18);
-    heart.bezierCurveTo(x - 42, y - 8, x - 27, y - 34, x - 7, y - 22);
-    heart.bezierCurveTo(x, y - 36, x + 27, y - 34, x + 7, y - 22);
-    heart.bezierCurveTo(x + 27, y - 34, x + 42, y - 8, x, y + 18);
-    heart.closePath();
-    heart.fillPath();
-    heart.strokePath();
-    this.scene.add.circle(x - 7, y - 7, 4, 0xffc4db, 0.8);
-    this.scene.add.circle(x + 8, y - 6, 3, 0xffc4db, 0.7);
+    const heart = this.scene.add.container(x, y).setDepth(12);
+    const left = this.scene.add.circle(-11, -6, 14, 0xff5da5, 0.96).setStrokeStyle(2, 0xffe9a4);
+    const right = this.scene.add.circle(11, -6, 14, 0xff5da5, 0.96).setStrokeStyle(2, 0xffe9a4);
+    const point = this.scene.add.triangle(0, 8, -25, -5, 25, -5, 0, 28, 0xff5da5, 0.96).setStrokeStyle(2, 0xffe9a4);
+    const shineA = this.scene.add.circle(-8, -9, 4, 0xffc4db, 0.85);
+    const shineB = this.scene.add.circle(8, -8, 3, 0xffc4db, 0.7);
+    heart.add([left, right, point, shineA, shineB]);
   }
 }
