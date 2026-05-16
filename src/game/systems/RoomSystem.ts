@@ -5,6 +5,7 @@ import type { ProjectileSystem } from './ProjectileSystem';
 import type { StatusEffectSystem } from './StatusEffectSystem';
 import type { TargetingSystem } from './TargetingSystem';
 import type { EconomySystem } from './EconomySystem';
+import type { AudioSystem } from './AudioSystem';
 import { chance } from '../utils/math';
 
 export class RoomSystem {
@@ -16,6 +17,7 @@ export class RoomSystem {
     private projectiles: ProjectileSystem,
     private statuses: StatusEffectSystem,
     private economy: EconomySystem,
+    private audio?: AudioSystem,
   ) {}
 
   update(deltaMs: number, rooms: Room[], enemies: Enemy[]) {
@@ -34,12 +36,14 @@ export class RoomSystem {
     if (room.def.id === 'cauldron_nursery') {
       if (!this.state.waveActive) return;
       this.economy.addMana(room.level >= 3 ? 8 : 4);
+      this.audio?.playRoom(room.def.id);
       return;
     }
     const target = this.targeting.findTarget(room, enemies);
     if (!target) return;
     if (room.def.id === 'moon_bell') {
       this.targeting.nearbyEnemies(room, enemies, room.range()).forEach((enemy) => this.statuses.applyRoomEffects(room, enemy, this.state.activeCombos));
+      this.audio?.playRoom(room.def.id);
       return;
     }
     if (room.def.id === 'clockwork_orrery') {
@@ -49,10 +53,12 @@ export class RoomSystem {
         target.applyStatus('snared', 1900, 0.38);
         target.applyDamage(11, ['Root', 'Time'], room.id);
       }
+      this.audio?.playRoom(room.def.id);
       return;
     }
     this.projectiles.fire(room, target, room.damage(), this.state.activeCombos);
     this.statuses.applyRoomEffects(room, target, this.state.activeCombos);
+    this.audio?.playRoom(room.def.id);
     if (this.state.activeCombos.some((combo) => combo.id === 'spicy_stew_economy') && room.def.id === 'fire_imp_kitchen' && chance(0.2)) this.economy.addMana(2);
   }
 
@@ -70,5 +76,6 @@ export class RoomSystem {
       enemy.applyDamage(18, ['Fire', 'Root', 'Moon'], 'solar-orchard');
       enemy.applyStatus('burning', 1800, 4);
     });
+    this.audio?.play('combo');
   }
 }

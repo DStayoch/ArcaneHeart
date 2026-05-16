@@ -70,7 +70,7 @@ export class GameScene extends Phaser.Scene {
       this.targeting = new TargetingSystem();
       this.projectiles = new ProjectileSystem(this);
       this.statuses = new StatusEffectSystem(this.state);
-      this.rooms = new RoomSystem(this.state, this.targeting, this.projectiles, this.statuses, this.economy);
+      this.rooms = new RoomSystem(this.state, this.targeting, this.projectiles, this.statuses, this.economy, this.audio);
       this.createUi();
       this.wireInput();
       this.refreshUi();
