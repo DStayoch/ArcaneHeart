@@ -202,6 +202,7 @@ export class GameScene extends Phaser.Scene {
     room.on('dragstart', () => {
       if (this.state.waveActive) return;
       if (room.mergedInto) return;
+      room.isDragging = true;
       this.draggingRoom = room;
       this.dragOrigin = { x: room.x, y: room.y };
       room.setDepth(300);
@@ -230,6 +231,7 @@ export class GameScene extends Phaser.Scene {
       } else {
         this.cancelRoomDrag(room);
       }
+      room.isDragging = false;
       room.setDepth(0);
       this.tower.slots.forEach((candidate) => candidate.setPreview(false));
       this.draggingRoom = undefined;
@@ -253,6 +255,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private cancelRoomDrag(room: Room) {
+    room.isDragging = false;
     if (this.dragOrigin) {
       this.tweens.add({ targets: room, x: room.homeX, y: room.homeY, duration: 160, ease: 'Sine.easeOut' });
     }
