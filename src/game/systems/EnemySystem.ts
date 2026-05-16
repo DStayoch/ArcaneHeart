@@ -17,7 +17,9 @@ export class EnemySystem {
   }
 
   spawn(enemyId: EnemyId, elite = false) {
-    const enemy = new Enemy(this.scene, enemyId, this.path, elite);
+    const healthScale = 1 + Math.max(0, this.state.wave - 1) * 0.1;
+    const speedScale = 1 + Math.max(0, this.state.wave - 1) * 0.018;
+    const enemy = new Enemy(this.scene, enemyId, this.path, elite, healthScale, speedScale);
     if (this.spawnedThisWave === 0 && this.mutations.has('cellar_teeth')) enemy.applyStatus('snared', 2200, 0.32);
     if (this.mutations.has('stairs_rearrange')) enemy.applyStatus('dazed', 1200, 0.08);
     this.enemies.push(enemy);

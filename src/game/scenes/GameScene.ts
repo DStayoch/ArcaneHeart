@@ -174,7 +174,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.state.wave += 1;
-    this.economy.addMana(28 + this.state.wave * 3);
+    this.economy.addMana(18 + this.state.wave * 2);
     if ((this.state.wave - 1) % 2 === 0) {
       this.state.paused = true;
       this.mutationPanel.showChoices(this.mutations.choices());

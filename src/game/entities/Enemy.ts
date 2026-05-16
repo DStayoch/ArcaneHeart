@@ -24,20 +24,23 @@ export class Enemy extends Phaser.GameObjects.Container {
   private statuses = new Map<StatusId, StatusState>();
   private path: PathPoint[];
   private elite: boolean;
+  private speedScale: number;
 
-  constructor(scene: Phaser.Scene, enemyId: EnemyId, path: PathPoint[], elite = false) {
+  constructor(scene: Phaser.Scene, enemyId: EnemyId, path: PathPoint[], elite = false, healthScale = 1, speedScale = 1) {
     const start = path[0];
     super(scene, start.x, start.y);
     this.def = enemyDefinitions[enemyId];
     this.path = path;
     this.elite = elite;
-    this.maxHp = this.def.hp * (elite ? 1.55 : 1);
+    this.speedScale = speedScale;
+    this.maxHp = this.def.hp * healthScale * (elite ? 1.75 : 1);
     this.hp = this.maxHp;
     const radius = this.def.boss ? 22 : elite ? 17 : 13;
     this.body = scene.add.ellipse(0, 0, radius * 2, radius * 2, this.def.color, 0.95).setStrokeStyle(2, 0xf7e3ab);
-    this.label = scene.add.text(0, -1, this.def.icon, { fontSize: this.def.boss ? '18px' : '13px', color: '#fff9e5', fontStyle: 'bold' }).setOrigin(0.5);
+    const details = this.createModel(radius);
+    this.label = scene.add.text(0, radius + 13, this.def.icon, { fontSize: this.def.boss ? '12px' : '10px', color: '#fff9e5', fontStyle: 'bold' }).setOrigin(0.5);
     this.bar = scene.add.rectangle(0, radius + 6, radius * 2, 4, 0x5eff9a).setOrigin(0.5);
-    this.add([this.body, this.label, this.bar]);
+    this.add([this.body, details, this.label, this.bar]);
     scene.add.existing(this);
   }
 
@@ -47,7 +50,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     const slow = Math.max(this.getStatusPower('snared'), this.getStatusPower('chilled'));
     const dazed = this.getStatusPower('dazed');
     const mutationDrag = 1;
-    const speed = this.def.speed * (1 - slow) * (1 - dazed) * mutationDrag;
+    const speed = this.def.speed * this.speedScale * (1 - slow) * (1 - dazed) * mutationDrag;
     this.progress += (speed * speedMultiplier * deltaMs) / 1000 / 620;
     const point = getPointAtProgress(this.path, this.progress);
     this.setPosition(point.x, point.y);
@@ -113,5 +116,58 @@ export class Enemy extends Phaser.GameObjects.Container {
     if (this.hasStatus('frail')) return 0xd6b5ff;
     if (this.hasStatus('marked')) return 0xffe577;
     return 0xf7e3ab;
+  }
+
+  private createModel(radius: number) {
+    const c = this.scene.add.container(0, 0);
+    const g = this.scene.add.graphics();
+    c.add(g);
+    switch (this.def.id) {
+      case 'scribble_goblin':
+        g.lineStyle(2, 0x1d3218, 1);
+        g.strokeCircle(-4, -4, 4).strokeCircle(5, -5, 3);
+        g.lineBetween(-8, 3, 8, -1).lineBetween(-5, 7, 1, 1).lineBetween(4, 7, 8, 1);
+        c.add(this.scene.add.triangle(-8, -11, 0, 0, 8, 4, 3, 10, 0x8ee068, 1));
+        c.add(this.scene.add.circle(4, -3, 2, 0x101010));
+        break;
+      case 'candle_knight':
+        c.add(this.scene.add.rectangle(0, 0, radius * 1.2, radius * 1.45, 0xffdc78, 1).setStrokeStyle(1, 0x6f4a21));
+        c.add(this.scene.add.triangle(0, -radius - 5, -5, 4, 0, -8, 5, 4, 0xff713b, 1));
+        c.add(this.scene.add.rectangle(0, 3, radius * 0.9, 4, 0x7a522a, 1));
+        break;
+      case 'gloom_slime':
+        g.fillStyle(0x596890, 0.95).fillEllipse(0, 4, radius * 1.8, radius * 1.25);
+        g.fillStyle(0x26304a, 0.9).fillCircle(-4, 1, 2).fillCircle(5, 0, 2);
+        g.lineStyle(2, 0x9bb1e8, 0.8).lineBetween(-8, -6, -1, -11).lineBetween(3, -8, 9, -13);
+        break;
+      case 'winged_inkling':
+        c.add(this.scene.add.triangle(-10, 0, 0, 0, -16, -8, -5, 8, 0x171225, 1));
+        c.add(this.scene.add.triangle(10, 0, 0, 0, 16, -8, 5, 8, 0x171225, 1));
+        c.add(this.scene.add.ellipse(0, 1, radius * 0.95, radius * 1.35, 0x2c2446, 1).setStrokeStyle(1, 0x8974d0));
+        c.add(this.scene.add.circle(-3, -2, 2, 0xd7ceff));
+        c.add(this.scene.add.circle(3, -2, 2, 0xd7ceff));
+        break;
+      case 'clockwork_wyvern':
+        c.add(this.scene.add.polygon(0, 0, [[-13, 4], [-3, -9], [12, -2], [7, 8]], 0xb08b59, 1).setStrokeStyle(1, 0x332618));
+        c.add(this.scene.add.circle(-3, 0, 5, 0xead08d).setStrokeStyle(1, 0x332618));
+        c.add(this.scene.add.triangle(10, -6, 0, 0, 12, -10, 18, -2, 0x87683d, 1));
+        g.lineStyle(2, 0x43321d, 1).strokeCircle(-3, 0, 7).lineBetween(-3, -7, -3, -11);
+        break;
+      case 'curse_collector':
+        c.add(this.scene.add.rectangle(0, 1, radius * 1.3, radius * 1.35, 0x9bdbd1, 1).setStrokeStyle(1, 0x21443f));
+        c.add(this.scene.add.rectangle(0, -7, radius * 1.45, 5, 0x21443f, 1));
+        c.add(this.scene.add.text(0, 2, '$', { fontSize: '13px', color: '#11302c', fontStyle: 'bold' }).setOrigin(0.5));
+        break;
+      case 'page_eater':
+        g.fillStyle(0xd95f9d, 1).fillRoundedRect(-24, -13, 48, 26, 11);
+        g.fillStyle(0xffc5de, 1).fillTriangle(16, -8, 25, 0, 16, 8);
+        g.lineStyle(2, 0x4a1830, 1).lineBetween(-14, -8, -5, 8).lineBetween(-1, -9, 7, 9).lineBetween(11, -7, 17, 7);
+        c.add(this.scene.add.circle(-16, -4, 3, 0xfff2ad));
+        break;
+      default:
+        break;
+    }
+    if (this.elite) c.add(this.scene.add.star(0, -radius - 9, 5, 4, 8, 0xfff08a, 1));
+    return c;
   }
 }
