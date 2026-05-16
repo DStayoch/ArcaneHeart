@@ -42,37 +42,52 @@ export class GameScene extends Phaser.Scene {
   private wavePreview!: WavePreview;
   private mutationPanel!: MutationChoicePanel;
   private roomInfo!: RoomInfoPanel;
-  private tutorial!: TutorialPanel;
+  private tutorial?: TutorialPanel;
   private audio!: AudioSystem;
   private selectedRoom?: Room;
+  private ready = false;
 
   constructor() {
     super('GameScene');
   }
 
   create() {
-    this.state = createGameState();
-    this.add.rectangle(0, 0, 1280, 720, 0x100a18).setOrigin(0);
-    this.decorateBackground();
-    this.tower = new TowerMapSystem(this);
-    this.tower.create();
-    this.economy = new EconomySystem(this.state);
-    this.audio = new AudioSystem(this);
-    this.mutations = new MutationSystem(this.state);
-    this.build = new BuildSystem(this, this.economy);
-    this.enemies = new EnemySystem(this, this.state, this.economy, this.mutations, this.tower.path);
-    this.waves = new WaveSystem(this, this.state, this.enemies);
-    this.targeting = new TargetingSystem();
-    this.projectiles = new ProjectileSystem(this);
-    this.statuses = new StatusEffectSystem(this.state);
-    this.rooms = new RoomSystem(this.state, this.targeting, this.projectiles, this.statuses, this.economy);
-    this.combos = new ComboSystem(this);
-    this.createUi();
-    this.wireInput();
-    this.refreshUi();
+    try {
+      this.state = createGameState();
+      this.add.rectangle(0, 0, 1280, 720, 0x100a18).setOrigin(0);
+      this.decorateBackground();
+      this.tower = new TowerMapSystem(this);
+      this.tower.create();
+      this.economy = new EconomySystem(this.state);
+      this.audio = new AudioSystem(this);
+      this.mutations = new MutationSystem(this.state);
+      this.build = new BuildSystem(this, this.economy);
+      this.enemies = new EnemySystem(this, this.state, this.economy, this.mutations, this.tower.path);
+      this.waves = new WaveSystem(this, this.state, this.enemies);
+      this.targeting = new TargetingSystem();
+      this.projectiles = new ProjectileSystem(this);
+      this.statuses = new StatusEffectSystem(this.state);
+      this.rooms = new RoomSystem(this.state, this.targeting, this.projectiles, this.statuses, this.economy);
+      this.combos = new ComboSystem(this);
+      this.createUi();
+      this.wireInput();
+      this.refreshUi();
+      this.ready = true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.add.rectangle(0, 0, 1280, 720, 0x160911).setOrigin(0);
+      this.add.text(60, 80, `GameScene failed to start:\n${message}`, {
+        fontSize: '22px',
+        color: '#ffb7c8',
+        wordWrap: { width: 1100 },
+        lineSpacing: 8,
+      });
+      console.error(error);
+    }
   }
 
   update(_time: number, delta: number) {
+    if (!this.ready) return;
     this.enemies.update(delta);
     this.rooms.update(delta, this.build.rooms, this.enemies.enemies);
     this.projectiles.update(this.state.paused ? 0 : delta * this.state.speed, this.enemies.enemies, this.state.activeCombos);
@@ -89,7 +104,6 @@ export class GameScene extends Phaser.Scene {
     this.buildMenu = new BuildMenu(this, this.state);
     this.roomInfo = new RoomInfoPanel(this);
     this.mutationPanel = new MutationChoicePanel(this);
-    this.tutorial = new TutorialPanel(this);
     this.buildMenu.onBuild = (slot, roomId) => {
       const room = this.build.build(slot, roomId);
       if (room) this.attachRoomInput(room);
@@ -136,11 +150,14 @@ export class GameScene extends Phaser.Scene {
       this.refreshUi();
     });
     this.hud.restartButton.on('pointerdown', () => this.scene.restart());
-    this.hud.tutorialButton.on('pointerdown', () => this.tutorial.open());
+    this.hud.tutorialButton.on('pointerdown', () => {
+      this.tutorial ??= new TutorialPanel(this);
+      this.tutorial.open();
+    });
     this.input.keyboard?.on('keydown-ESC', () => {
       this.buildMenu.close();
       this.tooltip.hide();
-      this.tutorial.setVisible(false);
+      this.tutorial?.setVisible(false);
     });
   }
 
@@ -196,7 +213,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private decorateBackground() {
-    for (let i = 0; i < 120; i += 1) {
+    for (let i = 0; i < 35; i += 1) {
       this.add.circle(Phaser.Math.Between(0, 1280), Phaser.Math.Between(55, 720), Phaser.Math.Between(1, 2), 0xffe1a1, Phaser.Math.FloatBetween(0.05, 0.24));
     }
   }

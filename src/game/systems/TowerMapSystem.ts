@@ -12,8 +12,7 @@ export class TowerMapSystem {
 
   create() {
     const g = this.scene.add.graphics();
-    g.fillStyle(0x181020, 1).fillRoundedRect(350, 78, 540, 620, 16);
-    g.lineStyle(3, 0x6f527d, 0.8).strokeRoundedRect(350, 78, 540, 620, 16);
+    this.scene.add.rectangle(620, 388, 540, 620, 0x181020, 1).setStrokeStyle(3, 0x6f527d, 0.8);
     for (let floor = 0; floor < FLOOR_COUNT; floor += 1) {
       const y = TOWER_TOP + floor * FLOOR_HEIGHT;
       const tint = floor % 2 === 0 ? 0x241832 : 0x2b1d3c;
@@ -50,9 +49,9 @@ export class TowerMapSystem {
 
   private drawHeart(x: number, y: number) {
     const heart = this.scene.add.container(x, y).setDepth(12);
-    const left = this.scene.add.circle(-11, -6, 14, 0xff5da5, 0.96).setStrokeStyle(2, 0xffe9a4);
-    const right = this.scene.add.circle(11, -6, 14, 0xff5da5, 0.96).setStrokeStyle(2, 0xffe9a4);
-    const point = this.scene.add.triangle(0, 8, -25, -5, 25, -5, 0, 28, 0xff5da5, 0.96).setStrokeStyle(2, 0xffe9a4);
+    const left = this.scene.add.circle(-11, -6, 14, 0xff5da5, 0.96);
+    const right = this.scene.add.circle(11, -6, 14, 0xff5da5, 0.96);
+    const point = this.scene.add.triangle(0, 8, -25, -5, 25, -5, 0, 28, 0xff5da5, 0.96);
     const shineA = this.scene.add.circle(-8, -9, 4, 0xffc4db, 0.85);
     const shineB = this.scene.add.circle(8, -8, 3, 0xffc4db, 0.7);
     heart.add([left, right, point, shineA, shineB]);
