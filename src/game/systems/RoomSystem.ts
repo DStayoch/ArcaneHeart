@@ -6,11 +6,10 @@ import type { StatusEffectSystem } from './StatusEffectSystem';
 import type { TargetingSystem } from './TargetingSystem';
 import type { EconomySystem } from './EconomySystem';
 import type { AudioSystem } from './AudioSystem';
+import type { VisualEffectsSystem } from './VisualEffectsSystem';
 import { chance } from '../utils/math';
 
 export class RoomSystem {
-  private solarTimer = 0;
-
   constructor(
     private state: GameState,
     private targeting: TargetingSystem,
@@ -18,6 +17,7 @@ export class RoomSystem {
     private statuses: StatusEffectSystem,
     private economy: EconomySystem,
     private audio?: AudioSystem,
+    private fx?: VisualEffectsSystem,
   ) {}
 
   update(deltaMs: number, rooms: Room[], enemies: Enemy[]) {
@@ -80,6 +80,8 @@ export class RoomSystem {
           enemy.applyDamage(room.damage() * 0.62, ['Root', 'Moon'], room.id);
           enemy.applyStatus('snared', 1200, 0.22);
         });
+        this.fx?.fusionCast(fusion.id, room, [target, ...this.targeting.nearbyEnemies(target, enemies, 115).filter((enemy) => enemy !== target).slice(0, 2)]);
+        this.audio?.play('damage');
         this.audio?.play('combo');
         return;
       }
@@ -87,7 +89,10 @@ export class RoomSystem {
         if (!target) return;
         this.projectiles.fire(room, target, room.damage() * 1.15, [fusion]);
         this.statuses.applyRoomEffects(room, target, [fusion]);
-        this.targeting.nearbyEnemies(target, enemies, 130).slice(0, 3).forEach((enemy) => enemy.applyStatus('burning', 2200, 5));
+        const victims = this.targeting.nearbyEnemies(target, enemies, 130).slice(0, 3);
+        victims.forEach((enemy) => enemy.applyStatus('burning', 2200, 5));
+        this.fx?.fusionCast(fusion.id, room, [target, ...victims]);
+        this.audio?.play('damage');
         this.audio?.playRoom('mirror_hatchery');
         return;
       }
@@ -98,6 +103,8 @@ export class RoomSystem {
           enemy.applyStatus('snared', 1700, 0.26);
           enemy.applyStatus('frail', 3100, 0.32);
         });
+        this.fx?.fusionCast(fusion.id, room, victims);
+        this.audio?.play('damage');
         this.audio?.playRoom('grave_moth_chapel');
         return;
       }
@@ -106,13 +113,18 @@ export class RoomSystem {
         target.rewind(0.095);
         target.applyDamage(room.damage() * 1.4 + 8, ['Root', 'Time'], room.id);
         target.applyStatus('snared', 2600, 0.42);
-        this.targeting.nearbyEnemies(target, enemies, 80).forEach((enemy) => enemy.applyDamage(7, ['Root', 'Time'], room.id));
+        const victims = this.targeting.nearbyEnemies(target, enemies, 80);
+        victims.forEach((enemy) => enemy.applyDamage(7, ['Root', 'Time'], room.id));
+        this.fx?.fusionCast(fusion.id, room, [target, ...victims]);
+        this.audio?.play('damage');
         this.audio?.playRoom('clockwork_orrery');
         return;
       }
       case 'echo_lightning': {
         if (!target) return;
         this.projectiles.fire(room, target, room.damage() * 1.2, [fusion]);
+        this.fx?.fusionCast(fusion.id, room, this.targeting.nearbyEnemies(target, enemies, 155).slice(0, 4));
+        this.audio?.play('damage');
         this.audio?.playRoom('storm_harp');
         return;
       }
@@ -120,7 +132,10 @@ export class RoomSystem {
         if (this.state.waveActive) this.economy.addMana(room.level >= 3 ? 10 : 6);
         if (target) {
           target.applyDamage(room.damage() * 0.95 + 6, ['Fire', 'Alchemy'], room.id);
-          this.targeting.nearbyEnemies(target, enemies, 85).forEach((enemy) => enemy.applyStatus('burning', 2800, 6));
+          const victims = this.targeting.nearbyEnemies(target, enemies, 85);
+          victims.forEach((enemy) => enemy.applyStatus('burning', 2800, 6));
+          this.fx?.fusionCast(fusion.id, room, [target, ...victims]);
+          this.audio?.play('damage');
         }
         this.audio?.playRoom('cauldron_nursery');
         return;
@@ -132,6 +147,8 @@ export class RoomSystem {
           enemy.applyStatus('burning', 2400, 5);
           enemy.applyStatus('marked', 1800, 0.2);
         });
+        this.fx?.fusionCast(fusion.id, room, victims);
+        this.audio?.play('damage');
         this.audio?.play('combo');
         return;
       }

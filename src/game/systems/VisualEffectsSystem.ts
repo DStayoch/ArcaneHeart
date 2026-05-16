@@ -63,4 +63,54 @@ export class VisualEffectsSystem {
     this.scene.tweens.add({ targets: sigil, scale: 2.4, angle: 180, alpha: 0, duration: 900, ease: 'Cubic.easeOut', onComplete: () => sigil.destroy() });
     this.scene.tweens.add({ targets: label, y: label.y - 18, alpha: 0, duration: 1200, onComplete: () => label.destroy() });
   }
+
+  fusionCast(comboId: string, room: Room, targets: Enemy[]) {
+    const color = this.fusionColor(comboId);
+    const ring = this.scene.add.circle(room.x, room.y, 18, color, 0.18).setStrokeStyle(3, color, 0.95).setDepth(140);
+    this.scene.tweens.add({ targets: ring, scale: comboId === 'solar_orchard' ? 5.4 : 3.2, alpha: 0, duration: 620, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
+    targets.slice(0, 7).forEach((target, index) => {
+      const beam = this.scene.add.graphics().setDepth(135);
+      beam.lineStyle(comboId === 'echo_lightning' ? 4 : 3, color, 0.85).lineBetween(room.x, room.y, target.x, target.y);
+      this.scene.tweens.add({ targets: beam, alpha: 0, duration: 220 + index * 35, onComplete: () => beam.destroy() });
+      this.spawnThemedBurst(comboId, target.x, target.y, color, index);
+    });
+  }
+
+  private spawnThemedBurst(comboId: string, x: number, y: number, color: number, offset: number) {
+    const count = comboId === 'solar_orchard' ? 9 : 5;
+    for (let i = 0; i < count; i += 1) {
+      const particle = comboId === 'lunar_brambles'
+        ? this.scene.add.rectangle(x, y, 4, 14, color, 0.9).setRotation(Phaser.Math.FloatBetween(-1.2, 1.2))
+        : comboId === 'funeral_chime'
+          ? this.scene.add.ellipse(x, y, 10, 5, color, 0.82)
+          : comboId === 'solar_orchard'
+            ? this.scene.add.circle(x, y - 28, 5, i % 2 ? 0xffaa4f : 0xff5f68, 0.95)
+            : this.scene.add.star(x, y, 5, 2, 5, color, 0.9);
+      particle.setDepth(145);
+      this.scene.tweens.add({
+        targets: particle,
+        x: x + Phaser.Math.Between(-34, 34),
+        y: y + Phaser.Math.Between(-30, 24) + offset * 2,
+        angle: Phaser.Math.Between(90, 360),
+        alpha: 0,
+        scale: comboId === 'solar_orchard' ? 1.8 : 0.35,
+        duration: 420 + i * 18,
+        ease: 'Cubic.easeOut',
+        onComplete: () => particle.destroy(),
+      });
+    }
+  }
+
+  private fusionColor(comboId: string) {
+    const colors: Record<string, number> = {
+      lunar_brambles: 0xbdf4ff,
+      prismatic_fireflies: 0xffd36b,
+      funeral_chime: 0xdac7ff,
+      time_grown_thorns: 0x95e784,
+      echo_lightning: 0x8fe7ff,
+      spicy_stew_economy: 0xff8f45,
+      solar_orchard: 0xffaa4f,
+    };
+    return colors[comboId] ?? 0xffffff;
+  }
 }
