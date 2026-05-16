@@ -13,11 +13,11 @@ export class TowerMapSystem {
   create() {
     const g = this.scene.add.graphics();
     this.drawBackgroundSpire();
-    this.scene.add.rectangle(TOWER_X, 388, 258, 620, 0x181020, 1).setStrokeStyle(3, 0x6f527d, 0.8);
+    this.scene.add.rectangle(TOWER_X, 388, 258, 620, 0x181020, 0.5).setStrokeStyle(3, 0x8d6ab0, 0.82);
     for (let floor = 0; floor < FLOOR_COUNT; floor += 1) {
       const y = TOWER_TOP + floor * FLOOR_HEIGHT;
       const tint = floor % 2 === 0 ? 0x241832 : 0x2b1d3c;
-      g.fillStyle(tint, 0.96).fillRect(TOWER_X - 120, y, 240, FLOOR_HEIGHT - 5);
+      g.fillStyle(tint, 0.72).fillRect(TOWER_X - 120, y, 240, FLOOR_HEIGHT - 5);
       g.lineStyle(1, 0x775e8e, 0.45).lineBetween(TOWER_X - 110, y + FLOOR_HEIGHT - 5, TOWER_X + 110, y + FLOOR_HEIGHT - 5);
       this.scene.add.text(TOWER_X - 112, y + 18, `${FLOOR_COUNT - floor}`, { fontSize: '13px', color: '#bda7d6' });
       this.drawSideBridge(g, TOWER_X - 252, y + 28, TOWER_X - 122, y + 28);
@@ -67,7 +67,7 @@ export class TowerMapSystem {
   }
 
   private drawBackgroundSpire() {
-    const bg = this.scene.add.graphics().setDepth(-10);
+    const bg = this.scene.add.graphics().setDepth(-2);
     const stone = 0x412d5a;
     const stoneDark = 0x1b1128;
     const trim = 0xba91df;
