@@ -13,7 +13,6 @@ export class Room extends Phaser.GameObjects.Container {
   activeFusion?: ComboDefinition;
   fusedCombo?: ComboDefinition;
   mergedInto?: string;
-  isDragging = false;
   homeX: number;
   homeY: number;
   private bg: Phaser.GameObjects.Rectangle;
@@ -89,14 +88,13 @@ export class Room extends Phaser.GameObjects.Container {
     this.setFusionActive(role !== 'none', color);
     if (role === 'anchor' && combo) {
       this.setAlpha(1);
-      if (!this.isDragging) this.setPosition(mergedX, mergedY);
+      this.setPosition(mergedX, mergedY);
       this.setScale(1);
       this.text.setText(`${combo.name.split(' ').map((word) => word[0]).join('')} ${this.level}`);
       this.bg.setSize(92, 38);
       this.bg.setFillStyle(color, 0.92).setStrokeStyle(4, 0xffffff, 1);
       this.disableInteractive();
       this.setInteractive({ useHandCursor: true });
-      this.scene.input.setDraggable(this);
     } else if (role === 'contributor') {
       this.setPosition(mergedX, mergedY);
       this.setAlpha(0);
@@ -110,14 +108,13 @@ export class Room extends Phaser.GameObjects.Container {
         return;
       }
       this.setAlpha(1);
-      if (!this.isDragging) this.setPosition(this.homeX, this.homeY);
+      this.setPosition(this.homeX, this.homeY);
       this.setScale(1);
       this.text.setText(`Lv ${this.level}`);
       this.bg.setSize(92, 38);
       this.bg.setFillStyle(this.def.color, 0.88).setStrokeStyle(this.level >= 3 ? 4 : this.level === 2 ? 3 : 2, this.level >= 3 ? 0xffffff : 0xfff0bd, 0.9);
       this.disableInteractive();
       this.setInteractive({ useHandCursor: true });
-      this.scene.input.setDraggable(this);
     }
   }
 
