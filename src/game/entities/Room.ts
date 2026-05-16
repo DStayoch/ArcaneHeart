@@ -11,6 +11,7 @@ export class Room extends Phaser.GameObjects.Container {
   slotId: string;
   floor: number;
   activeFusion?: ComboDefinition;
+  fusedCombo?: ComboDefinition;
   mergedInto?: string;
   homeX: number;
   homeY: number;
@@ -82,7 +83,7 @@ export class Room extends Phaser.GameObjects.Container {
   }
 
   setFusionRole(combo: ComboDefinition | undefined, role: 'anchor' | 'contributor' | 'none', color = 0xbdf4ff, mergedX = this.homeX, mergedY = this.homeY) {
-    this.activeFusion = role === 'anchor' ? combo : undefined;
+    this.activeFusion = role === 'anchor' ? combo : this.fusedCombo;
     this.mergedInto = role === 'contributor' ? combo?.id : undefined;
     this.setFusionActive(role !== 'none', color);
     if (role === 'anchor' && combo) {
@@ -102,6 +103,10 @@ export class Room extends Phaser.GameObjects.Container {
       this.bg.setFillStyle(color, 0.32).setStrokeStyle(2, color, 0.9);
       this.disableInteractive();
     } else {
+      if (this.fusedCombo) {
+        this.setFusionRole(this.fusedCombo, 'anchor', this.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff, this.homeX, this.homeY);
+        return;
+      }
       this.setAlpha(1);
       this.setPosition(this.homeX, this.homeY);
       this.setScale(1);
@@ -111,6 +116,11 @@ export class Room extends Phaser.GameObjects.Container {
       this.disableInteractive();
       this.setInteractive({ useHandCursor: true, draggable: true });
     }
+  }
+
+  becomeFusedChild(combo: ComboDefinition, color = 0xbdf4ff) {
+    this.fusedCombo = combo;
+    this.setFusionRole(combo, 'anchor', color, this.homeX, this.homeY);
   }
 
   private createModel() {

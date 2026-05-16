@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { BuildSlot } from '../entities/BuildSlot';
 import { Room } from '../entities/Room';
 import type { RoomId } from '../core/types';
+import type { ComboDefinition } from '../core/types';
 import { roomDefinitions } from '../data/rooms';
 import type { EconomySystem } from './EconomySystem';
 
@@ -58,6 +59,21 @@ export class BuildSystem {
     this.scene.tweens.add({ targets: room, x: targetSlot.x, y: targetSlot.y, duration: 170, ease: 'Sine.easeOut' });
     this.ping(targetSlot.x, targetSlot.y, room.def.color);
     return true;
+  }
+
+  consumeFusion(anchor: Room, contributors: Room[], combo: ComboDefinition, slots: BuildSlot[]) {
+    contributors.forEach((room) => {
+      const slot = slots.find((candidate) => candidate.model.id === room.slotId);
+      if (slot) {
+        slot.model.roomId = undefined;
+        slot.clearRoomLabel();
+      }
+      const index = this.rooms.indexOf(room);
+      if (index >= 0) this.rooms.splice(index, 1);
+      room.destroy();
+    });
+    anchor.becomeFusedChild(combo, combo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff);
+    this.ping(anchor.homeX, anchor.homeY, combo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff);
   }
 
   private ping(x: number, y: number, color: number) {

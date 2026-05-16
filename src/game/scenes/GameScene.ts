@@ -104,7 +104,13 @@ export class GameScene extends Phaser.Scene {
   private createUi() {
     this.tooltip = new Tooltip(this);
     this.hud = new Hud(this, this.state, this.waves, this.tooltip);
-    this.combos = new ComboSystem(this, this.tooltip, this.fx);
+    this.combos = new ComboSystem(this, this.tooltip, this.fx, (anchor, contributors, combo) => {
+      this.build.consumeFusion(anchor, contributors, combo, this.tower.slots);
+      if (this.selectedRoom && contributors.includes(this.selectedRoom)) {
+        this.selectedRoom = anchor;
+        this.roomInfo.refresh(anchor);
+      }
+    });
     this.wavePreview = new WavePreview(this, this.waves);
     this.buildMenu = new BuildMenu(this, this.state);
     this.roomInfo = new RoomInfoPanel(this);

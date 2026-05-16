@@ -10,7 +10,12 @@ export class ComboSystem {
   private sigils: Phaser.GameObjects.GameObject[] = [];
   private previous = new Set<string>();
 
-  constructor(private scene: Phaser.Scene, private tooltip?: Tooltip, private fx?: VisualEffectsSystem) {
+  constructor(
+    private scene: Phaser.Scene,
+    private tooltip?: Tooltip,
+    private fx?: VisualEffectsSystem,
+    private onMerge?: (anchor: Room, contributors: Room[], combo: ComboDefinition) => void,
+  ) {
     this.lines = scene.add.graphics().setDepth(20);
   }
 
@@ -21,16 +26,24 @@ export class ComboSystem {
     this.sigils = [];
     const used = new Set<Room>();
     rooms.forEach((room) => room.setFusionRole(undefined, 'none'));
+    rooms.filter((room) => room.fusedCombo).forEach((room) => {
+      if (!room.fusedCombo) return;
+      active.push(room.fusedCombo);
+      used.add(room);
+      room.setFusionRole(room.fusedCombo, 'anchor', room.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff, room.homeX, room.homeY);
+      this.drawFusion(room.fusedCombo, [room], room.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff);
+    });
     const orderedCombos = [...comboDefinitions].sort((a, b) => b.roomIds.length - a.roomIds.length);
     for (const combo of orderedCombos) {
-      const fusionRooms = this.findFusionRooms(combo, rooms.filter((room) => !used.has(room)));
+      const fusionRooms = this.findFusionRooms(combo, rooms.filter((room) => !used.has(room) && !room.fusedCombo));
       if (fusionRooms) {
         active.push(combo);
         const color = combo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff;
         fusionRooms.forEach((room) => used.add(room));
-        const merged = this.mergedPosition(fusionRooms);
-        fusionRooms.forEach((room, index) => room.setFusionRole(combo, index === 0 ? 'anchor' : 'contributor', color, merged.x, merged.y));
-        this.drawFusion(combo, fusionRooms, color);
+        const [anchor, ...contributors] = fusionRooms;
+        anchor.becomeFusedChild(combo, color);
+        this.onMerge?.(anchor, contributors, combo);
+        this.drawFusion(combo, [anchor], color);
         if (!this.previous.has(combo.id)) this.fx?.fusionActivated(combo, fusionRooms);
       }
     }
