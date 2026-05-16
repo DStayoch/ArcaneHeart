@@ -48,12 +48,22 @@ export class TowerMapSystem {
   }
 
   private drawHeart(x: number, y: number) {
-    const heart = this.scene.add.container(x, y).setDepth(12);
-    const left = this.scene.add.circle(-11, -6, 14, 0xff5da5, 0.96);
-    const right = this.scene.add.circle(11, -6, 14, 0xff5da5, 0.96);
-    const point = this.scene.add.triangle(0, 8, -25, -5, 25, -5, 0, 28, 0xff5da5, 0.96);
-    const shineA = this.scene.add.circle(-8, -9, 4, 0xffc4db, 0.85);
-    const shineB = this.scene.add.circle(8, -8, 3, 0xffc4db, 0.7);
-    heart.add([left, right, point, shineA, shineB]);
+    const heart = this.scene.add.graphics().setDepth(12);
+    const points = [
+      new Phaser.Math.Vector2(x, y + 24),
+      new Phaser.Math.Vector2(x - 34, y - 2),
+      new Phaser.Math.Vector2(x - 27, y - 24),
+      new Phaser.Math.Vector2(x - 8, y - 23),
+      new Phaser.Math.Vector2(x, y - 12),
+      new Phaser.Math.Vector2(x + 8, y - 23),
+      new Phaser.Math.Vector2(x + 27, y - 24),
+      new Phaser.Math.Vector2(x + 34, y - 2),
+    ];
+    heart.fillStyle(0xff5da5, 0.96);
+    heart.lineStyle(3, 0xffe9a4, 0.95);
+    heart.fillPoints(points, true);
+    heart.strokePoints(points, true);
+    this.scene.add.circle(x - 10, y - 10, 4, 0xffc4db, 0.85).setDepth(13);
+    this.scene.add.circle(x + 9, y - 9, 3, 0xffc4db, 0.72).setDepth(13);
   }
 }

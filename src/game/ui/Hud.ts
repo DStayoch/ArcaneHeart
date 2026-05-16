@@ -4,7 +4,10 @@ import type { WaveSystem } from '../systems/WaveSystem';
 
 export class Hud extends Phaser.GameObjects.Container {
   private manaBadge: Phaser.GameObjects.Text;
-  private stats: Phaser.GameObjects.Text;
+  private essenceText: Phaser.GameObjects.Text;
+  private heartText: Phaser.GameObjects.Text;
+  private waveText: Phaser.GameObjects.Text;
+  private remainingText: Phaser.GameObjects.Text;
   private combos: Phaser.GameObjects.Text;
   private mutations: Phaser.GameObjects.Text;
   readonly tutorialButton: Phaser.GameObjects.Text;
@@ -16,31 +19,37 @@ export class Hud extends Phaser.GameObjects.Container {
   constructor(scene: Phaser.Scene, private state: GameState, private waves: WaveSystem) {
     super(scene, 0, 0);
     scene.add.rectangle(0, 0, 1280, 54, 0x120b19, 0.94).setOrigin(0).setStrokeStyle(1, 0x6e557b);
-    scene.add.text(18, 14, 'THE LIVING SPIRE', { fontSize: '20px', color: '#ffe59d', fontStyle: 'bold' });
-    this.manaBadge = scene.add.text(245, 8, '', { fontSize: '24px', color: '#120b19', backgroundColor: '#77f0c2', padding: { x: 14, y: 5 }, fontStyle: 'bold' });
-    this.stats = scene.add.text(430, 14, '', { fontSize: '14px', color: '#f8ecd5' });
-    this.startButton = this.button(780, 12, 'Start Wave');
-    this.tutorialButton = this.button(900, 12, '?');
-    this.speedButton = this.button(948, 12, '1x');
-    this.pauseButton = this.button(1016, 12, 'Pause');
-    this.restartButton = this.button(1108, 12, 'Restart');
-    this.combos = scene.add.text(918, 66, '', { fontSize: '13px', color: '#bdf4ff', wordWrap: { width: 330 } });
-    this.mutations = scene.add.text(918, 246, '', { fontSize: '13px', color: '#d8c0ff', wordWrap: { width: 330 } });
+    scene.add.text(14, 15, 'LIVING SPIRE', { fontSize: '16px', color: '#ffe59d', fontStyle: 'bold' });
+    this.manaBadge = scene.add.text(154, 9, '', { fontSize: '22px', color: '#120b19', backgroundColor: '#77f0c2', padding: { x: 12, y: 4 }, fontStyle: 'bold' });
+    this.essenceText = scene.add.text(300, 16, '', { fontSize: '13px', color: '#f8ecd5' });
+    this.heartText = scene.add.text(405, 16, '', { fontSize: '13px', color: '#ffd1df' });
+    this.waveText = scene.add.text(500, 16, '', { fontSize: '13px', color: '#f8ecd5' });
+    this.remainingText = scene.add.text(590, 16, '', { fontSize: '13px', color: '#f8ecd5' });
+    this.startButton = this.button(720, 10, 'Start');
+    this.tutorialButton = this.button(798, 10, '?');
+    this.speedButton = this.button(842, 10, '1x');
+    this.pauseButton = this.button(895, 10, 'Pause');
+    this.restartButton = this.button(970, 10, 'Restart');
+    this.combos = scene.add.text(930, 90, '', { fontSize: '13px', color: '#bdf4ff', wordWrap: { width: 300 }, lineSpacing: 6 });
+    this.mutations = scene.add.text(930, 268, '', { fontSize: '13px', color: '#d8c0ff', wordWrap: { width: 300 }, lineSpacing: 6 });
     scene.add.existing(this);
   }
 
   refresh() {
     const wave = this.waves.getCurrentWave();
     this.manaBadge.setText(`Mana ${this.state.mana}`);
-    this.stats.setText(`Essence ${this.state.essence}   Heart ${this.state.heartHp}   Wave ${this.state.wave}/${this.waves.totalWaves()}   Remaining ${this.state.enemiesRemaining}`);
+    this.essenceText.setText(`Ess ${this.state.essence}`);
+    this.heartText.setText(`Heart ${this.state.heartHp}`);
+    this.waveText.setText(`Wave ${this.state.wave}/${this.waves.totalWaves()}`);
+    this.remainingText.setText(`Left ${this.state.enemiesRemaining}`);
     this.startButton.setAlpha(this.state.waveActive ? 0.45 : 1);
     this.speedButton.setText(`${this.state.speed}x`);
     this.pauseButton.setText(this.state.paused ? 'Resume' : 'Pause');
-    this.combos.setText(`Active Combos\n${this.state.activeCombos.map((combo) => combo.name).join('\n') || 'None yet'}\n\nPreview\n${wave?.title ?? 'Complete'}`);
+    this.combos.setText(`Active Combos\n${this.state.activeCombos.map((combo) => combo.name).join('\n') || 'None yet'}\n\nCurrent Wave\n${wave?.title ?? 'Complete'}`);
     this.mutations.setText(`Tower Moods\n${this.state.activeMutations.map((mutation) => mutation.name).join('\n') || 'The tower is listening.'}`);
   }
 
   private button(x: number, y: number, label: string) {
-    return this.scene.add.text(x, y, label, { fontSize: '15px', color: '#120b19', backgroundColor: '#f0cf83', padding: { x: 12, y: 6 } }).setInteractive({ useHandCursor: true });
+    return this.scene.add.text(x, y, label, { fontSize: '13px', color: '#120b19', backgroundColor: '#f0cf83', padding: { x: 10, y: 6 } }).setInteractive({ useHandCursor: true });
   }
 }

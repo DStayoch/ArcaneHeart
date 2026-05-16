@@ -20,7 +20,7 @@ export class Room extends Phaser.GameObjects.Container {
     this.def = roomDefinitions[roomId];
     this.slotId = slotId;
     this.floor = floor;
-    this.bg = scene.add.rectangle(0, 0, 92, 38, this.def.color, 0.92).setStrokeStyle(2, 0xfff0bd, 0.9);
+    this.bg = scene.add.rectangle(0, 0, 92, 38, this.def.color, 0.88).setStrokeStyle(2, 0xfff0bd, 0.9);
     this.model = this.createModel();
     this.text = scene.add.text(34, 10, `Lv ${this.level}`, { fontSize: '10px', color: '#130d18', fontStyle: 'bold' }).setOrigin(0.5);
     this.add([this.bg, this.model, this.text]);
@@ -61,57 +61,95 @@ export class Room extends Phaser.GameObjects.Container {
     const c = this.scene.add.container(-16, 0);
     const g = this.scene.add.graphics();
     c.add(g);
+    c.add(this.scene.add.rectangle(0, 0, 62, 30, 0x100916, 0.18).setStrokeStyle(1, 0xffffff, 0.16));
     switch (this.def.id) {
       case 'root_library':
-        c.add(this.scene.add.rectangle(-8, 0, 18, 24, 0x7b4d2e, 1).setStrokeStyle(1, 0x2b1a10));
-        c.add(this.scene.add.rectangle(8, 0, 18, 24, 0x3f6b3e, 1).setStrokeStyle(1, 0x172617));
-        g.lineStyle(2, 0x95e784, 1).lineBetween(-13, 10, -4, -3).lineBetween(-4, -3, 10, -11).lineBetween(-1, 8, 9, 1);
+        c.add(this.scene.add.rectangle(-15, 2, 9, 24, 0x7b4d2e, 1).setStrokeStyle(1, 0x2b1a10));
+        c.add(this.scene.add.rectangle(-5, 1, 9, 26, 0x9c6a3d, 1).setStrokeStyle(1, 0x2b1a10));
+        c.add(this.scene.add.rectangle(6, 2, 11, 24, 0x3f6b3e, 1).setStrokeStyle(1, 0x172617));
+        c.add(this.scene.add.rectangle(18, 3, 8, 22, 0x5fa65b, 1).setStrokeStyle(1, 0x172617));
+        g.lineStyle(3, 0x95e784, 1).lineBetween(-22, 13, -9, -2).lineBetween(-9, -2, 10, -13).lineBetween(-4, 9, 14, 2);
+        c.add(this.scene.add.circle(14, -12, 4, 0xd9ffb0, 0.9));
+        c.add(this.scene.add.star(-23, -10, 5, 2, 5, 0xb8ff8f, 0.9));
         break;
       case 'fire_imp_kitchen':
-        c.add(this.scene.add.ellipse(0, 4, 30, 17, 0x3b2a28, 1).setStrokeStyle(2, 0xffc36b));
-        c.add(this.scene.add.triangle(-7, -4, -8, 7, 0, -11, 8, 7, 0xff7438, 1));
-        c.add(this.scene.add.circle(10, -7, 4, 0xffd36b));
-        g.lineStyle(2, 0x5e1b10, 1).lineBetween(10, -3, 14, 2);
+        c.add(this.scene.add.ellipse(0, 5, 34, 18, 0x3b2a28, 1).setStrokeStyle(2, 0xffc36b));
+        c.add(this.scene.add.rectangle(0, -1, 24, 7, 0x5e1b10, 1));
+        c.add(this.scene.add.triangle(-8, -5, -9, 9, 0, -15, 9, 9, 0xff7438, 1));
+        c.add(this.scene.add.triangle(2, -6, -4, 7, 4, -16, 12, 7, 0xffd36b, 0.9));
+        c.add(this.scene.add.circle(16, -8, 5, 0xffd36b));
+        c.add(this.scene.add.circle(18, -8, 2, 0x3b1b12));
+        g.lineStyle(2, 0x5e1b10, 1).lineBetween(14, -3, 22, 4).lineBetween(12, -1, 5, 5);
+        c.add(this.scene.add.circle(-18, -10, 3, 0xffe0a0, 0.85));
         break;
       case 'moon_bell':
-        c.add(this.scene.add.ellipse(0, 0, 24, 27, 0xdfe8ff, 1).setStrokeStyle(2, 0x6477a0));
-        c.add(this.scene.add.circle(0, 13, 3, 0xfff0bd));
-        g.lineStyle(2, 0xaebdff, 0.9).strokeCircle(0, 0, 20);
+        c.add(this.scene.add.circle(0, 0, 22, 0xaebdff, 0.18));
+        c.add(this.scene.add.ellipse(0, 0, 25, 28, 0xdfe8ff, 1).setStrokeStyle(2, 0x6477a0));
+        c.add(this.scene.add.rectangle(0, -14, 18, 5, 0xfff0bd, 1));
+        c.add(this.scene.add.circle(0, 13, 4, 0xfff0bd));
+        g.lineStyle(2, 0xaebdff, 0.9).strokeCircle(0, 0, 22).strokeCircle(0, 0, 15);
+        c.add(this.scene.add.star(19, -12, 5, 2, 5, 0xffffc7, 1));
+        c.add(this.scene.add.star(-19, 10, 5, 2, 4, 0xdfe8ff, 0.9));
         break;
       case 'mirror_hatchery':
-        c.add(this.scene.add.polygon(0, 0, [[0, -16], [16, 0], [0, 16], [-16, 0]], 0xbaf7ff, 1).setStrokeStyle(2, 0x227987));
-        c.add(this.scene.add.circle(-8, 9, 5, 0xffd9fb));
-        c.add(this.scene.add.circle(10, 8, 4, 0xd4fff8));
-        g.lineStyle(1, 0xffffff, 0.9).lineBetween(-8, -4, 8, -12);
+        c.add(this.scene.add.polygon(0, 0, [[0, -18], [18, 0], [0, 18], [-18, 0]], 0xbaf7ff, 1).setStrokeStyle(2, 0x227987));
+        c.add(this.scene.add.polygon(1, 0, [[0, -11], [11, 0], [0, 11], [-11, 0]], 0xffd9fb, 0.38));
+        c.add(this.scene.add.circle(-12, 10, 6, 0xffd9fb));
+        c.add(this.scene.add.circle(13, 9, 5, 0xd4fff8));
+        c.add(this.scene.add.circle(5, 15, 3, 0xffffd6));
+        g.lineStyle(2, 0xffffff, 0.95).lineBetween(-9, -3, 10, -13).lineBetween(-5, 5, 8, -2);
+        g.lineStyle(1, 0x6fffff, 0.9).lineBetween(-22, -11, -14, -3).lineBetween(19, -9, 25, -15);
         break;
       case 'grave_moth_chapel':
-        c.add(this.scene.add.rectangle(0, 4, 26, 22, 0x5b456d, 1).setStrokeStyle(2, 0xdac7ff));
-        c.add(this.scene.add.triangle(0, -12, -16, 4, 0, -20, 16, 4, 0x2b2038, 1));
-        c.add(this.scene.add.ellipse(-7, -1, 10, 6, 0xded4ff, 0.9));
-        c.add(this.scene.add.ellipse(7, -1, 10, 6, 0xded4ff, 0.9));
+        c.add(this.scene.add.rectangle(0, 5, 28, 22, 0x5b456d, 1).setStrokeStyle(2, 0xdac7ff));
+        c.add(this.scene.add.triangle(0, -12, -18, 4, 0, -22, 18, 4, 0x2b2038, 1));
+        c.add(this.scene.add.rectangle(0, 7, 8, 14, 0x20142c, 1));
+        c.add(this.scene.add.ellipse(-9, -2, 13, 8, 0xded4ff, 0.9));
+        c.add(this.scene.add.ellipse(9, -2, 13, 8, 0xded4ff, 0.9));
+        c.add(this.scene.add.circle(0, -2, 3, 0xb99adf));
+        c.add(this.scene.add.star(-20, -10, 5, 2, 4, 0xdac7ff, 0.8));
+        g.lineStyle(1, 0xdac7ff, 0.6).lineBetween(-18, 13, 18, 13);
         break;
       case 'clockwork_orrery':
-        c.add(this.scene.add.circle(0, 1, 13, 0xe4b85a, 1).setStrokeStyle(2, 0x513b18));
-        c.add(this.scene.add.circle(-15, -7, 4, 0x8fc5ff));
-        c.add(this.scene.add.circle(16, 8, 5, 0xff9070));
-        g.lineStyle(2, 0x513b18, 1).strokeCircle(0, 1, 20).lineBetween(0, 1, 0, -9).lineBetween(0, 1, 8, 5);
+        c.add(this.scene.add.circle(0, 1, 14, 0xe4b85a, 1).setStrokeStyle(2, 0x513b18));
+        c.add(this.scene.add.circle(-17, -8, 5, 0x8fc5ff).setStrokeStyle(1, 0xd9f1ff));
+        c.add(this.scene.add.circle(18, 9, 6, 0xff9070).setStrokeStyle(1, 0xffd3c5));
+        c.add(this.scene.add.circle(13, -14, 3, 0xb8ff8f));
+        g.lineStyle(2, 0x513b18, 1).strokeCircle(0, 1, 22).lineBetween(0, 1, 0, -10).lineBetween(0, 1, 9, 6);
+        g.lineStyle(1, 0xffe8a3, 0.9).strokeCircle(0, 1, 8).lineBetween(-22, 1, 22, 1);
         break;
       case 'storm_harp':
-        g.lineStyle(3, 0x31568f, 1).lineBetween(-13, 13, -3, -15).lineBetween(-3, -15, 13, 12);
-        g.lineStyle(1, 0xdbecff, 1).lineBetween(-8, 9, 0, -10).lineBetween(-2, 10, 4, -8).lineBetween(5, 10, 8, -3);
-        c.add(this.scene.add.star(14, -9, 5, 2, 5, 0xfff68a, 1));
+        g.lineStyle(4, 0x31568f, 1).lineBetween(-15, 14, -4, -17).lineBetween(-4, -17, 15, 13).lineBetween(-15, 14, 15, 13);
+        g.lineStyle(1, 0xdbecff, 1).lineBetween(-10, 10, -1, -12).lineBetween(-4, 11, 4, -10).lineBetween(3, 11, 9, -5).lineBetween(9, 11, 13, 4);
+        g.lineStyle(2, 0x8fe7ff, 0.95).lineBetween(-24, -9, -14, -3).lineBetween(14, -14, 24, -20).lineBetween(12, -5, 22, 0);
+        c.add(this.scene.add.star(16, -11, 5, 2, 6, 0xfff68a, 1));
+        c.add(this.scene.add.circle(-19, -8, 3, 0xaed7ff, 0.9));
         break;
       case 'cauldron_nursery':
-        c.add(this.scene.add.ellipse(0, 7, 32, 18, 0x2f574c, 1).setStrokeStyle(2, 0xa7ffcf));
-        c.add(this.scene.add.rectangle(0, -1, 25, 8, 0x62d2a2, 1));
-        c.add(this.scene.add.circle(-8, -11, 4, 0xd4ffe7, 0.9));
-        c.add(this.scene.add.circle(4, -14, 3, 0xfff4a3, 0.9));
-        c.add(this.scene.add.circle(13, -9, 3, 0xbfffe1, 0.9));
+        c.add(this.scene.add.ellipse(0, 7, 34, 19, 0x2f574c, 1).setStrokeStyle(2, 0xa7ffcf));
+        c.add(this.scene.add.rectangle(0, -1, 26, 8, 0x62d2a2, 1));
+        c.add(this.scene.add.circle(-8, -11, 5, 0xd4ffe7, 0.9));
+        c.add(this.scene.add.circle(4, -15, 4, 0xfff4a3, 0.9));
+        c.add(this.scene.add.circle(14, -9, 3.5, 0xbfffe1, 0.9));
+        c.add(this.scene.add.circle(-15, -2, 3, 0xffd9fb, 0.95));
+        c.add(this.scene.add.circle(15, -1, 3, 0xffd9fb, 0.95));
+        g.lineStyle(2, 0x18352c, 1).lineBetween(-20, 8, -25, 16).lineBetween(20, 8, 25, 16);
+        c.add(this.scene.add.star(20, -15, 5, 2, 5, 0xfff4a3, 0.8));
         break;
       default:
         c.add(this.scene.add.text(0, 0, this.def.icon, { fontSize: '18px', color: '#130d18', fontStyle: 'bold' }).setOrigin(0.5));
         break;
     }
+    c.add(this.scene.add.star(27, -13, 5, 1.5, 3.5, 0xffffff, 0.55));
+    this.scene.tweens.add({
+      targets: c,
+      scaleX: 1.04,
+      scaleY: 1.04,
+      duration: 850,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
     return c;
   }
 }

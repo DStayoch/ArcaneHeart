@@ -36,9 +36,9 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.maxHp = this.def.hp * healthScale * (elite ? 1.75 : 1);
     this.hp = this.maxHp;
     const radius = this.def.boss ? 22 : elite ? 17 : 13;
-    this.body = scene.add.ellipse(0, 0, radius * 2, radius * 2, this.def.color, 0.95).setStrokeStyle(2, 0xf7e3ab);
+    this.body = scene.add.ellipse(0, 3, radius * 2.2, radius * 1.65, this.def.color, 0.28).setStrokeStyle(1, 0xf7e3ab, 0.45);
     const details = this.createModel(radius);
-    this.label = scene.add.text(0, radius + 13, this.def.icon, { fontSize: this.def.boss ? '12px' : '10px', color: '#fff9e5', fontStyle: 'bold' }).setOrigin(0.5);
+    this.label = scene.add.text(0, radius + 13, this.def.icon, { fontSize: this.def.boss ? '11px' : '9px', color: '#fff9e5', fontStyle: 'bold' }).setOrigin(0.5).setAlpha(0.75);
     this.bar = scene.add.rectangle(0, radius + 6, radius * 2, 4, 0x5eff9a).setOrigin(0.5);
     this.add([this.body, details, this.label, this.bar]);
     scene.add.existing(this);
@@ -122,52 +122,86 @@ export class Enemy extends Phaser.GameObjects.Container {
     const c = this.scene.add.container(0, 0);
     const g = this.scene.add.graphics();
     c.add(g);
+    c.add(this.scene.add.ellipse(0, radius * 0.7, radius * 2.35, radius * 0.55, 0x030206, 0.32));
     switch (this.def.id) {
       case 'scribble_goblin':
-        g.lineStyle(2, 0x1d3218, 1);
-        g.strokeCircle(-4, -4, 4).strokeCircle(5, -5, 3);
-        g.lineBetween(-8, 3, 8, -1).lineBetween(-5, 7, 1, 1).lineBetween(4, 7, 8, 1);
-        c.add(this.scene.add.triangle(-8, -11, 0, 0, 8, 4, 3, 10, 0x8ee068, 1));
-        c.add(this.scene.add.circle(4, -3, 2, 0x101010));
+        c.add(this.scene.add.star(0, -3, 7, radius * 0.55, radius * 0.95, 0x8ee068, 0.96).setStrokeStyle(2, 0x20381c));
+        c.add(this.scene.add.triangle(-10, -8, -3, -11, -15, -18, -13, -3, 0x6fc457, 1));
+        c.add(this.scene.add.triangle(10, -8, 3, -11, 15, -18, 13, -3, 0x6fc457, 1));
+        c.add(this.scene.add.circle(-5, -6, 3, 0xf8ffad));
+        c.add(this.scene.add.circle(6, -5, 3, 0xf8ffad));
+        c.add(this.scene.add.circle(-4, -6, 1.3, 0x111111));
+        c.add(this.scene.add.circle(7, -5, 1.3, 0x111111));
+        g.lineStyle(2, 0x193015, 1).lineBetween(-7, 2, 6, 3).lineBetween(-10, 8, -3, 3).lineBetween(9, 8, 3, 3);
+        g.lineStyle(1, 0xeaff9c, 0.7).lineBetween(-14, -1, -23, -7).lineBetween(13, 0, 23, -4);
         break;
       case 'candle_knight':
-        c.add(this.scene.add.rectangle(0, 0, radius * 1.2, radius * 1.45, 0xffdc78, 1).setStrokeStyle(1, 0x6f4a21));
-        c.add(this.scene.add.triangle(0, -radius - 5, -5, 4, 0, -8, 5, 4, 0xff713b, 1));
-        c.add(this.scene.add.rectangle(0, 3, radius * 0.9, 4, 0x7a522a, 1));
+        c.add(this.scene.add.rectangle(0, 1, radius * 1.35, radius * 1.75, 0xffdf88, 1).setStrokeStyle(2, 0x6f4a21));
+        c.add(this.scene.add.rectangle(0, -5, radius * 1.52, 5, 0xfff4c3, 0.95));
+        c.add(this.scene.add.triangle(0, -radius - 9, -7, -3, 0, -20, 7, -3, 0xff6b34, 1));
+        c.add(this.scene.add.triangle(0, -radius - 14, -4, -5, 0, -25, 4, -5, 0xfff08a, 0.9));
+        c.add(this.scene.add.rectangle(0, 3, radius * 0.92, 4, 0x6f4a21, 1));
+        g.lineStyle(2, 0x9b6b2c, 1).lineBetween(-12, 3, -22, 10).lineBetween(12, 1, 23, -8);
+        c.add(this.scene.add.rectangle(25, -7, 4, 17, 0xd9e5ff, 1).setRotation(0.55));
         break;
       case 'gloom_slime':
-        g.fillStyle(0x596890, 0.95).fillEllipse(0, 4, radius * 1.8, radius * 1.25);
-        g.fillStyle(0x26304a, 0.9).fillCircle(-4, 1, 2).fillCircle(5, 0, 2);
-        g.lineStyle(2, 0x9bb1e8, 0.8).lineBetween(-8, -6, -1, -11).lineBetween(3, -8, 9, -13);
+        g.fillStyle(0x596890, 0.92).fillEllipse(0, 5, radius * 2.15, radius * 1.35);
+        g.fillStyle(0x7f91c7, 0.85).fillEllipse(-7, 2, 14, 10).fillEllipse(8, 1, 11, 8);
+        g.fillStyle(0x26304a, 1).fillCircle(-5, 0, 2.2).fillCircle(6, -1, 2.2);
+        g.lineStyle(2, 0x9bb1e8, 0.9).lineBetween(-10, -8, -3, -16).lineBetween(2, -9, 11, -18).lineBetween(11, -4, 20, -11);
+        c.add(this.scene.add.circle(-13, 6, 3, 0x9bb1e8, 0.7));
+        c.add(this.scene.add.circle(15, 7, 2, 0x9bb1e8, 0.55));
         break;
       case 'winged_inkling':
-        c.add(this.scene.add.triangle(-10, 0, 0, 0, -16, -8, -5, 8, 0x171225, 1));
-        c.add(this.scene.add.triangle(10, 0, 0, 0, 16, -8, 5, 8, 0x171225, 1));
-        c.add(this.scene.add.ellipse(0, 1, radius * 0.95, radius * 1.35, 0x2c2446, 1).setStrokeStyle(1, 0x8974d0));
-        c.add(this.scene.add.circle(-3, -2, 2, 0xd7ceff));
-        c.add(this.scene.add.circle(3, -2, 2, 0xd7ceff));
+        c.add(this.scene.add.triangle(-11, 1, 0, -2, -24, -14, -8, 12, 0x15101f, 1).setStrokeStyle(1, 0x6650a0));
+        c.add(this.scene.add.triangle(11, 1, 0, -2, 24, -14, 8, 12, 0x15101f, 1).setStrokeStyle(1, 0x6650a0));
+        c.add(this.scene.add.ellipse(0, 1, radius * 1.05, radius * 1.5, 0x2c2446, 1).setStrokeStyle(2, 0x8974d0));
+        c.add(this.scene.add.triangle(0, 13, -5, 5, 5, 5, 0, 20, 0x15101f, 1));
+        c.add(this.scene.add.circle(-4, -3, 2.5, 0xd7ceff));
+        c.add(this.scene.add.circle(4, -3, 2.5, 0xd7ceff));
+        g.lineStyle(1, 0xb9a9ff, 0.75).lineBetween(-15, -4, -8, 2).lineBetween(15, -4, 8, 2);
         break;
       case 'clockwork_wyvern':
-        c.add(this.scene.add.polygon(0, 0, [[-13, 4], [-3, -9], [12, -2], [7, 8]], 0xb08b59, 1).setStrokeStyle(1, 0x332618));
-        c.add(this.scene.add.circle(-3, 0, 5, 0xead08d).setStrokeStyle(1, 0x332618));
-        c.add(this.scene.add.triangle(10, -6, 0, 0, 12, -10, 18, -2, 0x87683d, 1));
-        g.lineStyle(2, 0x43321d, 1).strokeCircle(-3, 0, 7).lineBetween(-3, -7, -3, -11);
+        c.add(this.scene.add.polygon(0, 0, [[-17, 5], [-4, -12], [15, -4], [10, 10]], 0xb08b59, 1).setStrokeStyle(2, 0x332618));
+        c.add(this.scene.add.triangle(-8, -2, -22, -11, -14, 3, -24, 10, 0x7b5e37, 1));
+        c.add(this.scene.add.circle(-3, 0, 7, 0xead08d).setStrokeStyle(2, 0x332618));
+        c.add(this.scene.add.triangle(12, -7, 2, -1, 15, -14, 23, -3, 0x87683d, 1).setStrokeStyle(1, 0x332618));
+        c.add(this.scene.add.circle(15, -6, 2, 0x9ff4ff));
+        g.lineStyle(2, 0x43321d, 1).strokeCircle(-3, 0, 10).lineBetween(-3, -10, -3, -16).lineBetween(-12, 0, -18, 0);
+        g.lineStyle(1, 0xffdf8a, 0.9).lineBetween(-3, 0, 3, -5).lineBetween(-3, 0, -7, 7);
         break;
       case 'curse_collector':
-        c.add(this.scene.add.rectangle(0, 1, radius * 1.3, radius * 1.35, 0x9bdbd1, 1).setStrokeStyle(1, 0x21443f));
-        c.add(this.scene.add.rectangle(0, -7, radius * 1.45, 5, 0x21443f, 1));
+        c.add(this.scene.add.rectangle(0, 2, radius * 1.45, radius * 1.55, 0x9bdbd1, 1).setStrokeStyle(2, 0x21443f));
+        c.add(this.scene.add.rectangle(0, -9, radius * 1.65, 6, 0x21443f, 1));
+        c.add(this.scene.add.rectangle(-11, 4, 5, 15, 0xf4e6b8, 1).setRotation(-0.25));
+        c.add(this.scene.add.rectangle(11, 4, 5, 15, 0xf4e6b8, 1).setRotation(0.25));
         c.add(this.scene.add.text(0, 2, '$', { fontSize: '13px', color: '#11302c', fontStyle: 'bold' }).setOrigin(0.5));
+        c.add(this.scene.add.circle(-5, -3, 1.7, 0x11302c));
+        c.add(this.scene.add.circle(5, -3, 1.7, 0x11302c));
+        g.lineStyle(1, 0xffef9e, 0.9).lineBetween(-18, -13, -24, -18).lineBetween(17, -12, 23, -18);
         break;
       case 'page_eater':
-        g.fillStyle(0xd95f9d, 1).fillRoundedRect(-24, -13, 48, 26, 11);
-        g.fillStyle(0xffc5de, 1).fillTriangle(16, -8, 25, 0, 16, 8);
-        g.lineStyle(2, 0x4a1830, 1).lineBetween(-14, -8, -5, 8).lineBetween(-1, -9, 7, 9).lineBetween(11, -7, 17, 7);
-        c.add(this.scene.add.circle(-16, -4, 3, 0xfff2ad));
+        g.fillStyle(0xd95f9d, 1).fillRoundedRect(-31, -15, 62, 30, 13);
+        g.fillStyle(0xf18bbf, 1).fillRoundedRect(-23, -10, 36, 20, 9);
+        g.fillStyle(0xfff0d0, 1).fillTriangle(18, -10, 31, 0, 18, 10);
+        g.lineStyle(2, 0x4a1830, 1).lineBetween(-18, -10, -10, 10).lineBetween(-5, -11, 3, 11).lineBetween(9, -10, 16, 9);
+        c.add(this.scene.add.circle(-20, -5, 4, 0xfff2ad));
+        c.add(this.scene.add.circle(-19, -5, 1.6, 0x4a1830));
+        c.add(this.scene.add.rectangle(0, -20, 22, 7, 0xf4e6b8, 0.95).setRotation(-0.3));
+        c.add(this.scene.add.rectangle(-8, 22, 24, 7, 0xf4e6b8, 0.9).setRotation(0.22));
         break;
       default:
         break;
     }
     if (this.elite) c.add(this.scene.add.star(0, -radius - 9, 5, 4, 8, 0xfff08a, 1));
+    this.scene.tweens.add({
+      targets: c,
+      y: c.y - 2,
+      duration: 650 + Math.floor(Math.random() * 420),
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
     return c;
   }
 }
