@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import type { GameState } from '../core/GameState';
 import type { WaveSystem } from '../systems/WaveSystem';
+import type { Tooltip } from './Tooltip';
+import { roomDefinitions } from '../data/rooms';
 
 export class Hud extends Phaser.GameObjects.Container {
   private manaBadge: Phaser.GameObjects.Text;
@@ -8,7 +10,9 @@ export class Hud extends Phaser.GameObjects.Container {
   private heartText: Phaser.GameObjects.Text;
   private waveText: Phaser.GameObjects.Text;
   private remainingText: Phaser.GameObjects.Text;
-  private combos: Phaser.GameObjects.Text;
+  private comboTitle: Phaser.GameObjects.Text;
+  private comboRows: Phaser.GameObjects.Text[] = [];
+  private currentWaveText: Phaser.GameObjects.Text;
   private mutations: Phaser.GameObjects.Text;
   readonly tutorialButton: Phaser.GameObjects.Text;
   readonly startButton: Phaser.GameObjects.Text;
@@ -16,7 +20,7 @@ export class Hud extends Phaser.GameObjects.Container {
   readonly speedButton: Phaser.GameObjects.Text;
   readonly restartButton: Phaser.GameObjects.Text;
 
-  constructor(scene: Phaser.Scene, private state: GameState, private waves: WaveSystem) {
+  constructor(scene: Phaser.Scene, private state: GameState, private waves: WaveSystem, private tooltip?: Tooltip) {
     super(scene, 0, 0);
     scene.add.rectangle(0, 0, 1280, 54, 0x120b19, 0.94).setOrigin(0).setStrokeStyle(1, 0x6e557b);
     scene.add.text(14, 15, 'LIVING SPIRE', { fontSize: '16px', color: '#ffe59d', fontStyle: 'bold' });
@@ -30,7 +34,8 @@ export class Hud extends Phaser.GameObjects.Container {
     this.speedButton = this.button(842, 10, '1x');
     this.pauseButton = this.button(895, 10, 'Pause');
     this.restartButton = this.button(970, 10, 'Restart');
-    this.combos = scene.add.text(930, 90, '', { fontSize: '13px', color: '#bdf4ff', wordWrap: { width: 300 }, lineSpacing: 6 });
+    this.comboTitle = scene.add.text(930, 90, 'Active Fusions', { fontSize: '13px', color: '#bdf4ff', fontStyle: 'bold' });
+    this.currentWaveText = scene.add.text(930, 218, '', { fontSize: '13px', color: '#f6e8ce', wordWrap: { width: 300 }, lineSpacing: 6 });
     this.mutations = scene.add.text(930, 268, '', { fontSize: '13px', color: '#d8c0ff', wordWrap: { width: 300 }, lineSpacing: 6 });
     scene.add.existing(this);
   }
@@ -45,8 +50,26 @@ export class Hud extends Phaser.GameObjects.Container {
     this.startButton.setAlpha(this.state.waveActive ? 0.45 : 1);
     this.speedButton.setText(`${this.state.speed}x`);
     this.pauseButton.setText(this.state.paused ? 'Resume' : 'Pause');
-    this.combos.setText(`Active Combos\n${this.state.activeCombos.map((combo) => combo.name).join('\n') || 'None yet'}\n\nCurrent Wave\n${wave?.title ?? 'Complete'}`);
+    this.refreshComboRows();
+    this.currentWaveText.setText(`Current Wave\n${wave?.title ?? 'Complete'}`);
     this.mutations.setText(`Tower Moods\n${this.state.activeMutations.map((mutation) => mutation.name).join('\n') || 'The tower is listening.'}`);
+  }
+
+  private refreshComboRows() {
+    this.comboRows.forEach((row) => row.destroy());
+    this.comboRows = [];
+    const combos = this.state.activeCombos;
+    if (!combos.length) {
+      this.comboRows.push(this.scene.add.text(930, 112, 'None yet', { fontSize: '13px', color: '#7f748f' }));
+      return;
+    }
+    combos.slice(0, 5).forEach((combo, index) => {
+      const row = this.scene.add.text(930, 112 + index * 20, `* ${combo.name}`, { fontSize: '13px', color: '#fff0bd', backgroundColor: '#21162d', padding: { x: 6, y: 3 } }).setInteractive({ useHandCursor: true });
+      const roomNames = combo.roomIds.map((id) => roomDefinitions[id].name).join(' + ');
+      row.on('pointerover', () => this.tooltip?.show(925, 118 + index * 20, `${combo.name}\nRooms: ${roomNames}\nEffect: ${combo.description}\nVisual: ${combo.visual}`));
+      row.on('pointerout', () => this.tooltip?.hide());
+      this.comboRows.push(row);
+    });
   }
 
   private button(x: number, y: number, label: string) {

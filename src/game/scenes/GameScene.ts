@@ -100,8 +100,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createUi() {
-    this.hud = new Hud(this, this.state, this.waves);
     this.tooltip = new Tooltip(this);
+    this.hud = new Hud(this, this.state, this.waves, this.tooltip);
     this.combos = new ComboSystem(this, this.tooltip, this.fx);
     this.wavePreview = new WavePreview(this, this.waves);
     this.buildMenu = new BuildMenu(this, this.state);
