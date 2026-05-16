@@ -4,7 +4,7 @@ import { enemyDefinitions } from '../data/enemies';
 
 export class WavePreview extends Phaser.GameObjects.Text {
   constructor(scene: Phaser.Scene, private waves: WaveSystem) {
-    super(scene, 930, 178, '', { fontSize: '13px', color: '#f6e8ce', wordWrap: { width: 300 }, lineSpacing: 6 });
+    super(scene, 930, 226, '', { fontSize: '13px', color: '#f6e8ce', wordWrap: { width: 300 }, lineSpacing: 6 });
     scene.add.existing(this);
   }
 

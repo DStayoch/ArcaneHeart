@@ -10,7 +10,7 @@ export const createSpirePath = (): PathPoint[] => {
   const points: PathPoint[] = [];
   for (let floor = FLOOR_COUNT - 1; floor >= 0; floor -= 1) {
     const y = TOWER_TOP + floor * FLOOR_HEIGHT + FLOOR_HEIGHT * 0.55;
-    const x = TOWER_X + (floor % 2 === 0 ? -34 : 34);
+    const x = TOWER_X + (floor % 2 === 0 ? -24 : 24);
     points.push({ x, y, floor });
   }
   return points;

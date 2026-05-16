@@ -35,8 +35,8 @@ export class Hud extends Phaser.GameObjects.Container {
     this.pauseButton = this.button(895, 10, 'Pause');
     this.restartButton = this.button(970, 10, 'Restart');
     this.comboTitle = scene.add.text(930, 90, 'Active Fusions', { fontSize: '13px', color: '#bdf4ff', fontStyle: 'bold' });
-    this.currentWaveText = scene.add.text(930, 218, '', { fontSize: '13px', color: '#f6e8ce', wordWrap: { width: 300 }, lineSpacing: 6 });
-    this.mutations = scene.add.text(930, 268, '', { fontSize: '13px', color: '#d8c0ff', wordWrap: { width: 300 }, lineSpacing: 6 });
+    this.currentWaveText = scene.add.text(930, 174, '', { fontSize: '13px', color: '#f6e8ce', wordWrap: { width: 300 }, lineSpacing: 6 });
+    this.mutations = scene.add.text(930, 354, '', { fontSize: '13px', color: '#d8c0ff', wordWrap: { width: 300 }, lineSpacing: 6 });
     scene.add.existing(this);
   }
 
@@ -63,7 +63,7 @@ export class Hud extends Phaser.GameObjects.Container {
       this.comboRows.push(this.scene.add.text(930, 112, 'None yet', { fontSize: '13px', color: '#7f748f' }));
       return;
     }
-    combos.slice(0, 5).forEach((combo, index) => {
+    combos.slice(0, 3).forEach((combo, index) => {
       const row = this.scene.add.text(930, 112 + index * 20, `* ${combo.name}`, { fontSize: '13px', color: '#fff0bd', backgroundColor: '#21162d', padding: { x: 6, y: 3 } }).setInteractive({ useHandCursor: true });
       const roomNames = combo.roomIds.map((id) => roomDefinitions[id].name).join(' + ');
       row.on('pointerover', () => this.tooltip?.show(925, 118 + index * 20, `${combo.name}\nRooms: ${roomNames}\nEffect: ${combo.description}\nVisual: ${combo.visual}`));

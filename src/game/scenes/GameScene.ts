@@ -155,6 +155,7 @@ export class GameScene extends Phaser.Scene {
       slot.on('pointerout', () => slot.setPreview(false));
     });
     this.hud.startButton.on('pointerdown', () => {
+      this.clearRoomSelection();
       this.audio.unlock();
       if (this.waves.startWave()) this.audio.play(this.state.wave === 10 ? 'boss' : 'wave');
     });
@@ -177,6 +178,10 @@ export class GameScene extends Phaser.Scene {
       this.buildMenu.close();
       this.tooltip.hide();
       this.tutorial?.setVisible(false);
+      this.clearRoomSelection();
+    });
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer, targets: Phaser.GameObjects.GameObject[]) => {
+      if (targets.length === 0) this.clearRoomSelection();
     });
   }
 
@@ -187,6 +192,7 @@ export class GameScene extends Phaser.Scene {
         this.roomInfo.refresh(this.moveRoomSelection);
         this.tooltip.hide();
         this.moveRoomSelection = undefined;
+        this.clearRoomSelection();
         return;
       }
     }
@@ -199,6 +205,9 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.buildMenu.open(slot);
+    this.selectedRoom = undefined;
+    this.moveRoomSelection = undefined;
+    this.roomInfo.refresh();
   }
 
   private attachRoomInput(room: Room) {
@@ -216,6 +225,12 @@ export class GameScene extends Phaser.Scene {
       this.tooltip.show(room.x + 58, room.y - 22, `${def.name}\nLevel ${room.level} | ${def.cost} Mana base\n${def.effect}\n${def.personality}${fusion}${moveHint}`);
     });
     room.on('pointerout', () => this.tooltip.hide());
+  }
+
+  private clearRoomSelection() {
+    this.selectedRoom = undefined;
+    this.moveRoomSelection = undefined;
+    this.roomInfo.refresh();
   }
 
   private completeWave() {

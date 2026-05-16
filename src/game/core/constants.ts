@@ -8,6 +8,6 @@ export const STARTING_HEART_HP = 20;
 export const TOWER_X = 620;
 export const TOWER_TOP = 116;
 export const FLOOR_HEIGHT = 58;
-export const PATH_WIDTH = 112;
+export const PATH_WIDTH = 72;
 export const ROOM_RANGE_SCALE = 1;
 export const WAVE_DELAY_MS = 820;
