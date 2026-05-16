@@ -15,9 +15,9 @@ export class BuildMenu extends Phaser.GameObjects.Container {
 
   constructor(scene: Phaser.Scene, private state: GameState) {
     super(scene, 24, 70);
-    scene.add.rectangle(0, 0, 302, 500, 0x120b19, 0.93).setOrigin(0).setStrokeStyle(2, 0x8d6ea7);
+    const panel = scene.add.rectangle(0, 0, 302, 500, 0x120b19, 0.93).setOrigin(0).setStrokeStyle(2, 0x8d6ea7);
     this.title = scene.add.text(14, 12, 'Choose a room', { fontSize: '18px', color: '#ffe6a6', fontStyle: 'bold' });
-    this.add(this.title);
+    this.add([panel, this.title]);
     roomList.forEach((room, index) => {
       const y = 48 + index * 54;
       const card = scene.add.container(14, y);

@@ -12,8 +12,8 @@ export class TowerMapSystem {
 
   create() {
     const g = this.scene.add.graphics();
-    g.fillStyle(0x181020, 1).fillRoundedRect(350, 38, 540, 620, 16);
-    g.lineStyle(3, 0x6f527d, 0.8).strokeRoundedRect(350, 38, 540, 620, 16);
+    g.fillStyle(0x181020, 1).fillRoundedRect(350, 78, 540, 620, 16);
+    g.lineStyle(3, 0x6f527d, 0.8).strokeRoundedRect(350, 78, 540, 620, 16);
     for (let floor = 0; floor < FLOOR_COUNT; floor += 1) {
       const y = TOWER_TOP + floor * FLOOR_HEIGHT;
       const tint = floor % 2 === 0 ? 0x241832 : 0x2b1d3c;
@@ -24,8 +24,8 @@ export class TowerMapSystem {
       this.makeSlot({ id: `f${floor}-right`, floor, side: 'right', x: TOWER_X + 176, y: y + 28 });
     }
     this.drawPath(g);
-    this.scene.add.text(TOWER_X, 27, 'ARCANE HEART', { fontSize: '18px', color: '#ffe9a4', fontStyle: 'bold' }).setOrigin(0.5);
-    this.scene.add.ellipse(TOWER_X, 52, 48, 28, 0xff5da5, 0.9).setStrokeStyle(3, 0xffe9a4);
+    this.scene.add.text(TOWER_X, 68, 'ARCANE HEART', { fontSize: '17px', color: '#ffe9a4', fontStyle: 'bold' }).setOrigin(0.5);
+    this.drawHeart(TOWER_X, 96);
   }
 
   getAdjacent(slot: BuildSlot) {
@@ -46,5 +46,21 @@ export class TowerMapSystem {
     for (let i = 0; i < this.path.length - 1; i += 1) {
       g.lineBetween(this.path[i].x, this.path[i].y, this.path[i + 1].x, this.path[i + 1].y);
     }
+  }
+
+  private drawHeart(x: number, y: number) {
+    const heart = this.scene.add.graphics();
+    heart.fillStyle(0xff5da5, 0.95);
+    heart.lineStyle(3, 0xffe9a4, 1);
+    heart.beginPath();
+    heart.moveTo(x, y + 18);
+    heart.bezierCurveTo(x - 42, y - 8, x - 27, y - 34, x - 7, y - 22);
+    heart.bezierCurveTo(x, y - 36, x + 27, y - 34, x + 7, y - 22);
+    heart.bezierCurveTo(x + 27, y - 34, x + 42, y - 8, x, y + 18);
+    heart.closePath();
+    heart.fillPath();
+    heart.strokePath();
+    this.scene.add.circle(x - 7, y - 7, 4, 0xffc4db, 0.8);
+    this.scene.add.circle(x + 8, y - 6, 3, 0xffc4db, 0.7);
   }
 }

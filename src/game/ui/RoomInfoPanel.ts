@@ -13,7 +13,7 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
 
   constructor(scene: Phaser.Scene) {
     super(scene, 918, 360);
-    scene.add.rectangle(0, 0, 330, 208, 0x120b19, 0.93).setOrigin(0).setStrokeStyle(2, 0x8d6ea7);
+    const panel = scene.add.rectangle(0, 0, 330, 208, 0x120b19, 0.93).setOrigin(0).setStrokeStyle(2, 0x8d6ea7);
     this.copy = scene.add.text(14, 14, 'Select a room for upgrades.', { fontSize: '13px', color: '#fff0cf', wordWrap: { width: 300 }, lineSpacing: 3 });
     const upgrade = this.button(14, 150, 'Upgrade');
     const sell = this.button(118, 150, 'Sell');
@@ -26,7 +26,7 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
       this.room.priority = priorities[(idx + 1) % priorities.length];
       this.refresh(this.room);
     });
-    this.add([this.copy, upgrade, sell, target]);
+    this.add([panel, this.copy, upgrade, sell, target]);
     scene.add.existing(this);
   }
 
