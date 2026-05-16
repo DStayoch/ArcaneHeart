@@ -242,7 +242,7 @@ export class GameScene extends Phaser.Scene {
 
   private cancelRoomDrag(room: Room) {
     if (this.dragOrigin) {
-      this.tweens.add({ targets: room, x: this.dragOrigin.x, y: this.dragOrigin.y, duration: 160, ease: 'Sine.easeOut' });
+      this.tweens.add({ targets: room, x: room.homeX, y: room.homeY, duration: 160, ease: 'Sine.easeOut' });
     }
     this.tower.slots.forEach((candidate) => candidate.setPreview(false));
     this.draggingRoom = undefined;

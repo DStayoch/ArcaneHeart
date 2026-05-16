@@ -53,6 +53,8 @@ export class BuildSystem {
     targetSlot.setRoomLabel(room.def.icon, room.def.color);
     room.slotId = targetSlot.model.id;
     room.floor = targetSlot.model.floor;
+    room.homeX = targetSlot.x;
+    room.homeY = targetSlot.y;
     this.scene.tweens.add({ targets: room, x: targetSlot.x, y: targetSlot.y, duration: 170, ease: 'Sine.easeOut' });
     this.ping(targetSlot.x, targetSlot.y, room.def.color);
     return true;

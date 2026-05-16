@@ -12,6 +12,8 @@ export class Room extends Phaser.GameObjects.Container {
   floor: number;
   activeFusion?: ComboDefinition;
   mergedInto?: string;
+  homeX: number;
+  homeY: number;
   private bg: Phaser.GameObjects.Rectangle;
   private text: Phaser.GameObjects.Text;
   private model: Phaser.GameObjects.Container;
@@ -24,6 +26,8 @@ export class Room extends Phaser.GameObjects.Container {
     this.def = roomDefinitions[roomId];
     this.slotId = slotId;
     this.floor = floor;
+    this.homeX = x;
+    this.homeY = y;
     this.bg = scene.add.rectangle(0, 0, 92, 38, this.def.color, 0.88).setStrokeStyle(2, 0xfff0bd, 0.9);
     this.upgradeGlow = scene.add.ellipse(0, 0, 104, 48, this.def.color, 0).setDepth(-1);
     this.model = this.createModel();
@@ -77,25 +81,35 @@ export class Room extends Phaser.GameObjects.Container {
     }
   }
 
-  setFusionRole(combo: ComboDefinition | undefined, role: 'anchor' | 'contributor' | 'none', color = 0xbdf4ff) {
+  setFusionRole(combo: ComboDefinition | undefined, role: 'anchor' | 'contributor' | 'none', color = 0xbdf4ff, mergedX = this.homeX, mergedY = this.homeY) {
     this.activeFusion = role === 'anchor' ? combo : undefined;
     this.mergedInto = role === 'contributor' ? combo?.id : undefined;
     this.setFusionActive(role !== 'none', color);
     if (role === 'anchor' && combo) {
       this.setAlpha(1);
-      this.setScale(1.12);
+      this.setPosition(mergedX, mergedY);
+      this.setScale(combo.roomIds.length >= 3 ? 1.42 : 1.28);
       this.text.setText(`${combo.name.split(' ').map((word) => word[0]).join('')} ${this.level}`);
+      this.bg.setSize(122, 52);
       this.bg.setFillStyle(color, 0.92).setStrokeStyle(4, 0xffffff, 1);
+      this.disableInteractive();
+      this.setInteractive({ useHandCursor: true, draggable: true });
     } else if (role === 'contributor') {
-      this.setAlpha(0.22);
-      this.setScale(0.44);
+      this.setPosition(mergedX, mergedY);
+      this.setAlpha(0);
+      this.setScale(0.1);
       this.text.setText('Merged');
       this.bg.setFillStyle(color, 0.32).setStrokeStyle(2, color, 0.9);
+      this.disableInteractive();
     } else {
       this.setAlpha(1);
+      this.setPosition(this.homeX, this.homeY);
       this.setScale(1);
       this.text.setText(`Lv ${this.level}`);
+      this.bg.setSize(92, 38);
       this.bg.setFillStyle(this.def.color, 0.88).setStrokeStyle(this.level >= 3 ? 4 : this.level === 2 ? 3 : 2, this.level >= 3 ? 0xffffff : 0xfff0bd, 0.9);
+      this.disableInteractive();
+      this.setInteractive({ useHandCursor: true, draggable: true });
     }
   }
 
