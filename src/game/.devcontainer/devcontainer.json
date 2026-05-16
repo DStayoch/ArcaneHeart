@@ -1,0 +1,13 @@
+{
+  "name": "The Living Spire",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite dev server",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "onCreateCommand": "npm install",
+  "postAttachCommand": "npm run dev"
+}
