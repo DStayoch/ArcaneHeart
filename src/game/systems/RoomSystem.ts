@@ -32,6 +32,7 @@ export class RoomSystem {
 
   private act(room: Room, enemies: Enemy[]) {
     if (room.def.id === 'cauldron_nursery') {
+      if (!this.state.waveActive) return;
       this.economy.addMana(room.level >= 3 ? 8 : 4);
       return;
     }

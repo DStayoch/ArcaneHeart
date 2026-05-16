@@ -13,6 +13,8 @@ export class Room extends Phaser.GameObjects.Container {
   private bg: Phaser.GameObjects.Rectangle;
   private text: Phaser.GameObjects.Text;
   private model: Phaser.GameObjects.Container;
+  private upgradeGlow: Phaser.GameObjects.Ellipse;
+  private fusionGlow?: Phaser.GameObjects.Ellipse;
 
   constructor(scene: Phaser.Scene, roomId: RoomId, slotId: string, floor: number, x: number, y: number) {
     super(scene, x, y);
@@ -21,9 +23,10 @@ export class Room extends Phaser.GameObjects.Container {
     this.slotId = slotId;
     this.floor = floor;
     this.bg = scene.add.rectangle(0, 0, 92, 38, this.def.color, 0.88).setStrokeStyle(2, 0xfff0bd, 0.9);
+    this.upgradeGlow = scene.add.ellipse(0, 0, 104, 48, this.def.color, 0).setDepth(-1);
     this.model = this.createModel();
     this.text = scene.add.text(34, 10, `Lv ${this.level}`, { fontSize: '10px', color: '#130d18', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add([this.bg, this.model, this.text]);
+    this.add([this.upgradeGlow, this.bg, this.model, this.text]);
     this.setSize(92, 38);
     this.setInteractive({ useHandCursor: true });
     scene.add.existing(this);
@@ -54,7 +57,22 @@ export class Room extends Phaser.GameObjects.Container {
     if (this.level >= 3) return;
     this.level += 1;
     this.text.setText(`Lv ${this.level}`);
+    this.upgradeGlow.setAlpha(this.level === 2 ? 0.18 : 0.34);
+    this.bg.setStrokeStyle(this.level === 2 ? 3 : 4, this.level === 2 ? 0xfff0bd : 0xffffff, 1);
+    this.model.setScale(this.level === 2 ? 1.09 : 1.18);
     this.scene.tweens.add({ targets: this, scaleX: 1.12, scaleY: 1.12, yoyo: true, duration: 120 });
+  }
+
+  setFusionActive(active: boolean, color = 0xbdf4ff) {
+    if (active && !this.fusionGlow) {
+      this.fusionGlow = this.scene.add.ellipse(0, 0, 112, 54, color, 0.22).setDepth(-2);
+      this.addAt(this.fusionGlow, 0);
+      this.scene.tweens.add({ targets: this.fusionGlow, alpha: 0.42, scaleX: 1.08, scaleY: 1.15, yoyo: true, repeat: -1, duration: 760 });
+    }
+    if (this.fusionGlow) {
+      this.fusionGlow.setFillStyle(color, active ? 0.26 : 0);
+      this.fusionGlow.setVisible(active);
+    }
   }
 
   private createModel() {

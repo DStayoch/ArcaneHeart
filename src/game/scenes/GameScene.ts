@@ -14,6 +14,7 @@ import { RoomSystem } from '../systems/RoomSystem';
 import { StatusEffectSystem } from '../systems/StatusEffectSystem';
 import { TargetingSystem } from '../systems/TargetingSystem';
 import { TowerMapSystem } from '../systems/TowerMapSystem';
+import { VisualEffectsSystem } from '../systems/VisualEffectsSystem';
 import { WaveSystem } from '../systems/WaveSystem';
 import { BuildMenu } from '../ui/BuildMenu';
 import { Hud } from '../ui/Hud';
@@ -44,6 +45,7 @@ export class GameScene extends Phaser.Scene {
   private roomInfo!: RoomInfoPanel;
   private tutorial?: TutorialPanel;
   private audio!: AudioSystem;
+  private fx!: VisualEffectsSystem;
   private selectedRoom?: Room;
   private ready = false;
 
@@ -60,15 +62,15 @@ export class GameScene extends Phaser.Scene {
       this.tower.create();
       this.economy = new EconomySystem(this.state);
       this.audio = new AudioSystem(this);
+      this.fx = new VisualEffectsSystem(this);
       this.mutations = new MutationSystem(this.state);
       this.build = new BuildSystem(this, this.economy);
-      this.enemies = new EnemySystem(this, this.state, this.economy, this.mutations, this.tower.path);
+      this.enemies = new EnemySystem(this, this.state, this.economy, this.mutations, this.tower.path, this.fx);
       this.waves = new WaveSystem(this, this.state, this.enemies);
       this.targeting = new TargetingSystem();
       this.projectiles = new ProjectileSystem(this);
       this.statuses = new StatusEffectSystem(this.state);
       this.rooms = new RoomSystem(this.state, this.targeting, this.projectiles, this.statuses, this.economy);
-      this.combos = new ComboSystem(this);
       this.createUi();
       this.wireInput();
       this.refreshUi();
@@ -100,6 +102,7 @@ export class GameScene extends Phaser.Scene {
   private createUi() {
     this.hud = new Hud(this, this.state, this.waves);
     this.tooltip = new Tooltip(this);
+    this.combos = new ComboSystem(this, this.tooltip, this.fx);
     this.wavePreview = new WavePreview(this, this.waves);
     this.buildMenu = new BuildMenu(this, this.state);
     this.roomInfo = new RoomInfoPanel(this);
@@ -116,7 +119,10 @@ export class GameScene extends Phaser.Scene {
     this.buildMenu.onHover = (x, y, text) => this.tooltip.show(x, y, text);
     this.buildMenu.onOut = () => this.tooltip.hide();
     this.roomInfo.onUpgrade = (room) => {
-      if (this.build.upgrade(room)) this.audio.play('build');
+      if (this.build.upgrade(room)) {
+        this.audio.play('build');
+        this.fx.roomUpgraded(room);
+      }
       this.roomInfo.refresh(room);
     };
     this.roomInfo.onSell = (room) => {
