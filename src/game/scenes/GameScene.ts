@@ -201,6 +201,7 @@ export class GameScene extends Phaser.Scene {
     });
     room.on('dragstart', () => {
       if (this.state.waveActive) return;
+      if (room.mergedInto) return;
       this.draggingRoom = room;
       this.dragOrigin = { x: room.x, y: room.y };
       room.setDepth(300);
@@ -210,10 +211,15 @@ export class GameScene extends Phaser.Scene {
     });
     room.on('drag', (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
       if (this.state.waveActive || this.draggingRoom !== room) return;
+      if (room.mergedInto) return;
       room.setPosition(dragX, dragY);
     });
     room.on('dragend', () => {
       if (this.state.waveActive || this.draggingRoom !== room) {
+        this.cancelRoomDrag(room);
+        return;
+      }
+      if (room.mergedInto) {
         this.cancelRoomDrag(room);
         return;
       }

@@ -89,12 +89,12 @@ export class Room extends Phaser.GameObjects.Container {
     if (role === 'anchor' && combo) {
       this.setAlpha(1);
       this.setPosition(mergedX, mergedY);
-      this.setScale(combo.roomIds.length >= 3 ? 1.42 : 1.28);
+      this.setScale(1);
       this.text.setText(`${combo.name.split(' ').map((word) => word[0]).join('')} ${this.level}`);
-      this.bg.setSize(122, 52);
+      this.bg.setSize(92, 38);
       this.bg.setFillStyle(color, 0.92).setStrokeStyle(4, 0xffffff, 1);
       this.disableInteractive();
-      this.setInteractive({ useHandCursor: true, draggable: true });
+      this.setInteractive({ useHandCursor: true });
     } else if (role === 'contributor') {
       this.setPosition(mergedX, mergedY);
       this.setAlpha(0);
@@ -114,7 +114,7 @@ export class Room extends Phaser.GameObjects.Container {
       this.bg.setSize(92, 38);
       this.bg.setFillStyle(this.def.color, 0.88).setStrokeStyle(this.level >= 3 ? 4 : this.level === 2 ? 3 : 2, this.level >= 3 ? 0xffffff : 0xfff0bd, 0.9);
       this.disableInteractive();
-      this.setInteractive({ useHandCursor: true, draggable: true });
+      this.setInteractive({ useHandCursor: true });
     }
   }
 
