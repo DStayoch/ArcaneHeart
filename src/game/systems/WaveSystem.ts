@@ -1,11 +1,13 @@
 import Phaser from 'phaser';
 import type { GameState } from '../core/GameState';
+import type { EnemyId } from '../core/types';
 import { waves } from '../data/waves';
 import type { EnemySystem } from './EnemySystem';
 
 export class WaveSystem {
   private spawning = false;
-  private queued = 0;
+  private queue: Array<{ enemyId: EnemyId; elite?: boolean; intervalMs: number }> = [];
+  private spawnTimer?: Phaser.Time.TimerEvent;
 
   constructor(private scene: Phaser.Scene, private state: GameState, private enemies: EnemySystem) {}
 
@@ -15,20 +17,11 @@ export class WaveSystem {
     if (!wave) return false;
     this.state.waveActive = true;
     this.spawning = true;
-    this.queued = wave.entries.reduce((sum, entry) => sum + entry.count, 0);
+    this.queue = wave.entries.flatMap((entry) =>
+      Array.from({ length: entry.count }, () => ({ enemyId: entry.enemyId, elite: entry.elite, intervalMs: entry.intervalMs })),
+    );
     this.enemies.beginWave();
-    let delay = 0;
-    for (const entry of wave.entries) {
-      for (let i = 0; i < entry.count; i += 1) {
-        delay += entry.intervalMs;
-        this.scene.time.delayedCall(delay, () => {
-          this.enemies.spawn(entry.enemyId, entry.elite);
-          this.queued -= 1;
-          if (this.queued <= 0) this.spawning = false;
-        });
-      }
-      delay += 420;
-    }
+    this.spawnNext();
     return true;
   }
 
@@ -46,5 +39,16 @@ export class WaveSystem {
 
   totalWaves() {
     return waves.length;
+  }
+
+  private spawnNext() {
+    const next = this.queue.shift();
+    if (!next) {
+      this.spawning = false;
+      this.spawnTimer = undefined;
+      return;
+    }
+    this.enemies.spawn(next.enemyId, next.elite);
+    this.spawnTimer = this.scene.time.delayedCall(next.intervalMs, () => this.spawnNext());
   }
 }
