@@ -47,6 +47,7 @@ export class GameScene extends Phaser.Scene {
   private audio!: AudioSystem;
   private fx!: VisualEffectsSystem;
   private selectedRoom?: Room;
+  private moveRoomSelection?: Room;
   private ready = false;
 
   constructor() {
@@ -120,6 +121,7 @@ export class GameScene extends Phaser.Scene {
       if (room) this.audio.play('build');
       this.buildMenu.close();
       this.selectedRoom = room;
+      this.moveRoomSelection = undefined;
       this.roomInfo.refresh(room);
       this.refreshUi();
     };
@@ -179,16 +181,19 @@ export class GameScene extends Phaser.Scene {
   }
 
   private openSlot(slot: BuildSlot) {
-    if (this.selectedRoom && !this.state.waveActive && !slot.model.roomId) {
-      if (this.build.moveRoom(this.selectedRoom, slot, this.tower.slots)) {
-        this.roomInfo.refresh(this.selectedRoom);
+    if (this.moveRoomSelection && !this.state.waveActive && !slot.model.roomId) {
+      if (this.build.moveRoom(this.moveRoomSelection, slot, this.tower.slots)) {
+        this.selectedRoom = this.moveRoomSelection;
+        this.roomInfo.refresh(this.moveRoomSelection);
         this.tooltip.hide();
+        this.moveRoomSelection = undefined;
         return;
       }
     }
     const existing = this.build.rooms.find((room) => room.slotId === slot.model.id);
     if (existing) {
       this.selectedRoom = existing;
+      this.moveRoomSelection = existing;
       this.roomInfo.refresh(existing);
       this.buildMenu.close();
       return;
@@ -200,13 +205,14 @@ export class GameScene extends Phaser.Scene {
     room.on('pointerdown', () => {
       if (room.mergedInto) return;
       this.selectedRoom = room;
+      this.moveRoomSelection = room;
       this.roomInfo.refresh(room);
       this.buildMenu.close();
     });
     room.on('pointerover', () => {
       const def = roomDefinitions[room.def.id];
       const fusion = room.activeFusion ? `\n\nMERGED: ${room.activeFusion.name}\n${room.activeFusion.description}` : room.mergedInto ? '\n\nAbsorbed into a merged room.' : '';
-      const moveHint = this.state.waveActive ? '\nMove: disabled during waves.' : '\nSelected rooms move by clicking an empty slot.';
+      const moveHint = this.state.waveActive ? '\nMove: disabled during waves.' : '\nClick this room, then click any empty slot to move it.';
       this.tooltip.show(room.x + 58, room.y - 22, `${def.name}\nLevel ${room.level} | ${def.cost} Mana base\n${def.effect}\n${def.personality}${fusion}${moveHint}`);
     });
     room.on('pointerout', () => this.tooltip.hide());
