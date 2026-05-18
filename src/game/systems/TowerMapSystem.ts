@@ -20,10 +20,10 @@ export class TowerMapSystem {
       g.fillStyle(tint, 0.72).fillRect(TOWER_X - 120, y, 240, FLOOR_HEIGHT - 5);
       g.lineStyle(1, 0x775e8e, 0.45).lineBetween(TOWER_X - 110, y + FLOOR_HEIGHT - 5, TOWER_X + 110, y + FLOOR_HEIGHT - 5);
       this.scene.add.text(TOWER_X - 112, y + 18, `${FLOOR_COUNT - floor}`, { fontSize: '13px', color: '#bda7d6' });
-      this.drawSideBridge(g, TOWER_X - 252, y + 28, TOWER_X - 122, y + 28);
-      this.drawSideBridge(g, TOWER_X + 122, y + 28, TOWER_X + 252, y + 28);
-      this.makeSlot({ id: `f${floor}-left`, floor, side: 'left', x: TOWER_X - 294, y: y + 28 });
-      this.makeSlot({ id: `f${floor}-right`, floor, side: 'right', x: TOWER_X + 294, y: y + 28 });
+      this.drawSideBridge(g, TOWER_X - 164, y + 28, TOWER_X - 122, y + 28);
+      this.drawSideBridge(g, TOWER_X + 122, y + 28, TOWER_X + 164, y + 28);
+      this.makeSlot({ id: `f${floor}-left`, floor, side: 'left', x: TOWER_X - 140, y: y + 28 });
+      this.makeSlot({ id: `f${floor}-right`, floor, side: 'right', x: TOWER_X + 140, y: y + 28 });
     }
     this.drawPath(g);
     this.scene.add.text(TOWER_X, 68, 'ARCANE HEART', { fontSize: '17px', color: '#ffe9a4', fontStyle: 'bold' }).setOrigin(0.5);
