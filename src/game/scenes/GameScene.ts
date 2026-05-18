@@ -301,8 +301,40 @@ export class GameScene extends Phaser.Scene {
   }
 
   private decorateBackground() {
-    for (let i = 0; i < 35; i += 1) {
-      this.add.circle(Phaser.Math.Between(0, 1280), Phaser.Math.Between(55, 720), Phaser.Math.Between(1, 2), 0xffe1a1, Phaser.Math.FloatBetween(0.05, 0.24));
+    const mist = this.add.graphics();
+    mist.fillStyle(0x180d22, 0.96).fillRect(0, 0, 1280, 720);
+    mist.fillStyle(0x2b1838, 0.46).fillEllipse(640, 730, 1180, 270);
+    mist.fillStyle(0x12332b, 0.14).fillEllipse(210, 600, 430, 160);
+    mist.fillStyle(0x39204f, 0.18).fillEllipse(1060, 592, 460, 190);
+
+    const moon = this.add.container(1094, 116);
+    moon.add(this.add.circle(0, 0, 54, 0xf3e6bb, 0.72));
+    moon.add(this.add.circle(18, -8, 51, 0x180d22, 0.86));
+    moon.add(this.add.circle(-10, 6, 86, 0xffe1a1, 0.06));
+    this.tweens.add({ targets: moon, y: 124, duration: 2600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    const leftThreat = this.add.container(136, 515).setAlpha(0.2);
+    leftThreat.add(this.add.ellipse(0, 0, 104, 58, 0xd95f9d, 0.32).setStrokeStyle(2, 0xffc4db, 0.3));
+    leftThreat.add(this.add.triangle(42, -2, 0, -24, 88, 0, 0, 24, 0xf18bbf, 0.32));
+    leftThreat.add(this.add.circle(-28, -8, 7, 0xfff0bd, 0.42));
+    this.tweens.add({ targets: leftThreat, x: 162, y: 500, alpha: 0.32, duration: 1900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    const rightThreat = this.add.container(1148, 488).setAlpha(0.18);
+    rightThreat.add(this.add.circle(0, 0, 48, 0x8fb8ff, 0.28).setStrokeStyle(2, 0xd9f1ff, 0.28));
+    rightThreat.add(this.add.circle(0, 0, 28, 0x10192c, 0.76));
+    const hand = this.add.graphics();
+    hand.lineStyle(3, 0xffe577, 0.36).lineBetween(0, 0, 0, -34).lineBetween(0, 0, 32, 12);
+    rightThreat.add(hand);
+    this.tweens.add({ targets: rightThreat, x: 1126, y: 502, angle: 8, alpha: 0.3, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    for (let i = 0; i < 95; i += 1) {
+      const star = this.add.circle(Phaser.Math.Between(0, 1280), Phaser.Math.Between(58, 700), Phaser.Math.Between(1, 3), i % 4 === 0 ? 0x77f0c2 : 0xffe1a1, Phaser.Math.FloatBetween(0.08, 0.44));
+      this.tweens.add({ targets: star, alpha: Phaser.Math.FloatBetween(0.04, 0.62), duration: Phaser.Math.Between(900, 2400), yoyo: true, repeat: -1, delay: Phaser.Math.Between(0, 900) });
+    }
+
+    for (let i = 0; i < 18; i += 1) {
+      const mote = this.add.star(Phaser.Math.Between(80, 1200), Phaser.Math.Between(170, 690), 5, 2, 5, i % 2 ? 0xbdf4ff : 0xffdf8f, 0.24);
+      this.tweens.add({ targets: mote, x: mote.x + Phaser.Math.Between(-18, 18), y: mote.y - Phaser.Math.Between(28, 72), angle: 180, alpha: 0.06, duration: Phaser.Math.Between(2200, 4200), yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
   }
 }

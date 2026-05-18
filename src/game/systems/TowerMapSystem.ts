@@ -13,13 +13,17 @@ export class TowerMapSystem {
   create() {
     const g = this.scene.add.graphics();
     this.drawBackgroundSpire();
-    this.scene.add.rectangle(TOWER_X, 388, 258, 620, 0x181020, 0.5).setStrokeStyle(3, 0x8d6ab0, 0.82);
+    this.scene.add.ellipse(TOWER_X, 404, 390, 640, 0x9f6bff, 0.055).setStrokeStyle(2, 0xffdf8f, 0.14);
+    this.scene.add.rectangle(TOWER_X, 388, 268, 620, 0x130b1d, 0.64).setStrokeStyle(4, 0xa87bd6, 0.82);
     for (let floor = 0; floor < FLOOR_COUNT; floor += 1) {
       const y = TOWER_TOP + floor * FLOOR_HEIGHT;
-      const tint = floor % 2 === 0 ? 0x241832 : 0x2b1d3c;
-      g.fillStyle(tint, 0.72).fillRect(TOWER_X - 120, y, 240, FLOOR_HEIGHT - 5);
-      g.lineStyle(1, 0x775e8e, 0.45).lineBetween(TOWER_X - 110, y + FLOOR_HEIGHT - 5, TOWER_X + 110, y + FLOOR_HEIGHT - 5);
-      this.scene.add.text(TOWER_X - 112, y + 18, `${FLOOR_COUNT - floor}`, { fontSize: '13px', color: '#bda7d6' });
+      const tint = floor % 2 === 0 ? 0x251831 : 0x2d1e3e;
+      g.fillStyle(tint, 0.9).fillRect(TOWER_X - 120, y, 240, FLOOR_HEIGHT - 5);
+      g.lineStyle(1, 0xffdf8f, 0.25).strokeRect(TOWER_X - 120, y, 240, FLOOR_HEIGHT - 5);
+      g.lineStyle(1, 0x77f0c2, 0.13).lineBetween(TOWER_X - 108, y + 8, TOWER_X + 108, y + 16);
+      this.scene.add.text(TOWER_X - 112, y + 18, `${FLOOR_COUNT - floor}`, { fontSize: '13px', color: '#d8c7f2', fontStyle: 'bold' });
+      const rune = this.scene.add.star(TOWER_X + (floor % 2 === 0 ? 86 : -86), y + 27, 5, 2, 5, floor % 3 === 0 ? 0x77f0c2 : 0xffdf8f, 0.48);
+      this.scene.tweens.add({ targets: rune, angle: 360, alpha: 0.18, duration: 2500 + floor * 130, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
       this.drawSideBridge(g, TOWER_X - 164, y + 28, TOWER_X - 122, y + 28);
       this.drawSideBridge(g, TOWER_X + 122, y + 28, TOWER_X + 164, y + 28);
       this.makeSlot({ id: `f${floor}-left`, floor, side: 'left', x: TOWER_X - 140, y: y + 28 });
@@ -40,15 +44,19 @@ export class TowerMapSystem {
   }
 
   private drawPath(g: Phaser.GameObjects.Graphics) {
-    g.lineStyle(PATH_WIDTH, 0x120c17, 0.56);
+    g.lineStyle(PATH_WIDTH, 0x0b0610, 0.64);
     for (let i = 0; i < this.path.length - 1; i += 1) {
       g.lineBetween(this.path[i].x, this.path[i].y, this.path[i + 1].x, this.path[i + 1].y);
     }
-    g.lineStyle(5, 0xffde8a, 0.5);
+    g.lineStyle(9, 0x21162d, 0.8);
     for (let i = 0; i < this.path.length - 1; i += 1) {
       g.lineBetween(this.path[i].x, this.path[i].y, this.path[i + 1].x, this.path[i + 1].y);
     }
-    g.lineStyle(2, 0xfff0bd, 0.42);
+    g.lineStyle(5, 0xffde8a, 0.58);
+    for (let i = 0; i < this.path.length - 1; i += 1) {
+      g.lineBetween(this.path[i].x, this.path[i].y, this.path[i + 1].x, this.path[i + 1].y);
+    }
+    g.lineStyle(2, 0xbdf4ff, 0.36);
     for (let i = 0; i < this.path.length - 1; i += 1) {
       const a = this.path[i];
       const b = this.path[i + 1];
@@ -62,18 +70,21 @@ export class TowerMapSystem {
   }
 
   private drawSideBridge(g: Phaser.GameObjects.Graphics, x1: number, y1: number, x2: number, y2: number) {
-    g.lineStyle(2, 0x6f527d, 0.5).lineBetween(x1, y1, x2, y2);
-    g.lineStyle(1, 0xffde8a, 0.22).lineBetween(x1, y1 - 5, x2, y2 - 5);
+    g.lineStyle(4, 0x6f527d, 0.44).lineBetween(x1, y1, x2, y2);
+    g.lineStyle(1, 0xffde8a, 0.42).lineBetween(x1, y1 - 5, x2, y2 - 5);
+    g.lineStyle(1, 0xbdf4ff, 0.18).lineBetween(x1, y1 + 5, x2, y2 + 5);
   }
 
   private drawBackgroundSpire() {
-    const bg = this.scene.add.graphics().setDepth(-2);
+    const bg = this.scene.add.graphics();
     const stone = 0x412d5a;
     const stoneDark = 0x1b1128;
     const trim = 0xba91df;
     const gold = 0xffdf91;
 
-    bg.fillStyle(0x07040b, 0.52).fillEllipse(TOWER_X, 696, 560, 76);
+    bg.fillStyle(0x07040b, 0.52).fillEllipse(TOWER_X, 696, 620, 82);
+    bg.fillStyle(0x9f6bff, 0.06).fillEllipse(TOWER_X, 388, 438, 690);
+    bg.fillStyle(0xffdf8f, 0.035).fillEllipse(TOWER_X, 92, 180, 126);
 
     // Far silhouette: makes the playable stair path feel like it sits inside an actual wizard tower.
     bg.fillStyle(0x11091a, 0.36);
@@ -87,10 +98,10 @@ export class TowerMapSystem {
     bg.fillStyle(stone, 0.34).fillRoundedRect(TOWER_X - 92, 116, 184, 590, 30);
     bg.fillStyle(0x543d70, 0.3).fillRoundedRect(TOWER_X - 66, 72, 132, 194, 28);
 
-    bg.fillStyle(0x26143a, 0.58).fillTriangle(TOWER_X, 8, TOWER_X - 112, 126, TOWER_X + 112, 126);
+    bg.fillStyle(0x130b1d, 0.54).fillTriangle(TOWER_X, 36, TOWER_X - 102, 126, TOWER_X + 102, 126);
     bg.lineStyle(4, trim, 0.28);
-    bg.lineBetween(TOWER_X, 8, TOWER_X - 112, 126);
-    bg.lineBetween(TOWER_X, 8, TOWER_X + 112, 126);
+    bg.lineBetween(TOWER_X, 36, TOWER_X - 102, 126);
+    bg.lineBetween(TOWER_X, 36, TOWER_X + 102, 126);
     bg.lineStyle(2, gold, 0.18);
     for (let x = TOWER_X - 72; x <= TOWER_X + 72; x += 24) {
       bg.lineBetween(x, 50, x + 34, 122);
@@ -152,8 +163,8 @@ export class TowerMapSystem {
     bg.fillRoundedRect(TOWER_X - 28, 640, 56, 60, 26);
     bg.lineStyle(2, gold, 0.12).strokeRoundedRect(TOWER_X - 28, 640, 56, 60, 26);
 
-    this.scene.add.circle(TOWER_X, 78, 78, 0xff5da5, 0.13).setDepth(-9);
-    this.scene.add.circle(TOWER_X, 92, 27, 0xffe9a4, 0.17).setDepth(-8);
+    this.scene.add.circle(TOWER_X, 78, 78, 0xff5da5, 0.13);
+    this.scene.add.circle(TOWER_X, 92, 27, 0xffe9a4, 0.17);
   }
 
   private drawWindow(bg: Phaser.GameObjects.Graphics, x: number, y: number, lit: boolean) {
@@ -181,5 +192,7 @@ export class TowerMapSystem {
     heart.strokePoints(points, true);
     this.scene.add.circle(x - 10, y - 10, 4, 0xffc4db, 0.85).setDepth(13);
     this.scene.add.circle(x + 9, y - 9, 3, 0xffc4db, 0.72).setDepth(13);
+    const pulse = this.scene.add.ellipse(x, y, 92, 64, 0xff5da5, 0.12).setStrokeStyle(2, 0xffe9a4, 0.28).setDepth(11);
+    this.scene.tweens.add({ targets: pulse, scaleX: 1.25, scaleY: 1.35, alpha: 0.02, duration: 820, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 }

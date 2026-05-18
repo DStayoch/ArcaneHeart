@@ -10,8 +10,8 @@ export class MenuScene extends Phaser.Scene {
     this.drawBackdrop();
     this.drawMoon();
     this.drawThreats();
-    this.drawTitle();
     this.drawTower();
+    this.drawTitle();
     this.drawFooterCopy();
     const start = this.add.text(640, 592, 'Start Night Watch', { fontSize: '25px', color: '#120b19', backgroundColor: '#f0cf83', padding: { x: 28, y: 13 }, fontStyle: 'bold' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     start.setDepth(40);
@@ -31,14 +31,13 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private drawTower() {
-    const g = this.add.graphics();
     const tower = this.add.container(640, 404);
     const aura = this.add.ellipse(0, 64, 370, 430, 0x9f6bff, 0.08).setStrokeStyle(2, 0xffdf8f, 0.18);
     const body = this.add.graphics();
     body.fillStyle(0x20142c, 0.96).fillRoundedRect(-150, -132, 300, 286, 18);
     body.lineStyle(4, 0xa87bd6, 0.9).strokeRoundedRect(-150, -132, 300, 286, 18);
-    body.fillStyle(0x130b1d, 0.78).fillTriangle(0, -250, -138, -120, 138, -120);
-    body.lineStyle(3, 0xffdf8f, 0.35).lineBetween(0, -250, -138, -120).lineBetween(0, -250, 138, -120);
+    body.fillStyle(0x130b1d, 0.68).fillTriangle(0, -224, -126, -120, 126, -120);
+    body.lineStyle(3, 0xffdf8f, 0.32).lineBetween(0, -224, -126, -120).lineBetween(0, -224, 126, -120);
     tower.add([aura, body]);
 
     for (let i = 0; i < 7; i += 1) {
@@ -122,14 +121,18 @@ export class MenuScene extends Phaser.Scene {
     const glow = this.add.text(640, 118, 'THE LIVING SPIRE', { fontSize: '66px', color: '#ff5da5', fontStyle: 'bold' }).setOrigin(0.5).setAlpha(0.32);
     const title = this.add.text(640, 112, 'THE LIVING SPIRE', { fontSize: '64px', color: '#ffe29a', fontStyle: 'bold' }).setOrigin(0.5);
     const subtitle = this.add.text(640, 178, 'Build living rooms. Fuse spell sentences. Survive the tower night.', { fontSize: '20px', color: '#d8c7f2' }).setOrigin(0.5);
-    this.add.text(640, 214, '18 waves of climbing chaos, mini-bosses, and hungry mega bosses', { fontSize: '15px', color: '#77f0c2' }).setOrigin(0.5).setAlpha(0.95);
+    const campaign = this.add.text(640, 214, '18 waves of climbing chaos, mini-bosses, and hungry mega bosses', { fontSize: '15px', color: '#77f0c2' }).setOrigin(0.5).setAlpha(0.95);
+    glow.setDepth(30);
+    title.setDepth(31);
+    subtitle.setDepth(31);
+    campaign.setDepth(31);
     this.tweens.add({ targets: glow, alpha: 0.58, scaleX: 1.025, scaleY: 1.12, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     this.tweens.add({ targets: title, y: 106, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     this.tweens.add({ targets: subtitle, alpha: 0.72, duration: 1400, yoyo: true, repeat: -1 });
 
     for (let i = 0; i < 10; i += 1) {
       const x = 316 + i * 72;
-      const rune = this.add.star(x, 238, i % 2 ? 6 : 5, 3, 8, i % 3 === 0 ? 0xbdf4ff : 0xffdf8f, 0.54);
+      const rune = this.add.star(x, 238, i % 2 ? 6 : 5, 3, 8, i % 3 === 0 ? 0xbdf4ff : 0xffdf8f, 0.54).setDepth(29);
       this.tweens.add({ targets: rune, y: 226 + (i % 2) * 20, angle: 360, alpha: 0.22, duration: 1800 + i * 140, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
   }
