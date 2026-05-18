@@ -81,10 +81,11 @@ export class ComboSystem {
   }
 
   private drawFusion(combo: ComboDefinition, rooms: Room[], color: number) {
-    const center = this.mergedPosition(rooms);
-    const sigil = this.scene.add.star(center.x, center.y, combo.roomIds.length >= 3 ? 8 : 6, 7, 15, color, 0.78).setStrokeStyle(2, 0xfff0bd, 0.9).setDepth(110);
+    const anchor = rooms[0];
+    const sigil = this.scene.add.star(34, -12, combo.roomIds.length >= 3 ? 8 : 6, 3, 8, color, 0.86).setStrokeStyle(1, 0xfff0bd, 0.95);
+    anchor.add(sigil);
     sigil.setInteractive({ useHandCursor: true });
-    sigil.on('pointerover', () => this.tooltip?.show(center.x + 18, center.y - 38, `${combo.name}\n${combo.description}\n${combo.visual}`));
+    sigil.on('pointerover', () => this.tooltip?.show(anchor.x + 48, anchor.y - 42, `${combo.name}\n${combo.description}\n${combo.visual}`));
     sigil.on('pointerout', () => this.tooltip?.hide());
     this.scene.tweens.add({ targets: sigil, angle: 360, duration: 2400, repeat: -1 });
     this.sigils.push(sigil);
@@ -101,7 +102,4 @@ export class ComboSystem {
     entries.forEach((entry) => this.drawFusion(entry.combo, entry.rooms, entry.color));
   }
 
-  private mergedPosition(rooms: Room[]) {
-    return rooms.reduce((acc, room) => ({ x: acc.x + room.homeX / rooms.length, y: acc.y + room.homeY / rooms.length }), { x: 0, y: 0 });
-  }
 }

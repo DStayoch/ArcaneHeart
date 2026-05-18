@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { createGameState, type GameState } from '../core/GameState';
+import { enemyDefinitions } from '../data/enemies';
 import { roomDefinitions } from '../data/rooms';
 import type { BuildSlot } from '../entities/BuildSlot';
 import type { Room } from '../entities/Room';
@@ -157,7 +158,8 @@ export class GameScene extends Phaser.Scene {
     this.hud.startButton.on('pointerdown', () => {
       this.clearRoomSelection();
       this.audio.unlock();
-      if (this.waves.startWave()) this.audio.play(this.state.wave === 10 ? 'boss' : 'wave');
+      const hasBoss = this.waves.getCurrentWave()?.entries.some((entry) => enemyDefinitions[entry.enemyId].boss) ?? false;
+      if (this.waves.startWave()) this.audio.play(hasBoss ? 'boss' : 'wave');
     });
     this.hud.pauseButton.on('pointerdown', () => {
       this.audio.unlock();

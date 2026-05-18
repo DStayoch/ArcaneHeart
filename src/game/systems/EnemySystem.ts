@@ -50,13 +50,15 @@ export class EnemySystem {
     this.scene.tweens.add({ targets: enemy, alpha: 0, scale: 1.6, duration: 200, onComplete: () => enemy.destroy() });
     this.enemies.splice(this.enemies.indexOf(enemy), 1);
     if (enemy.def.splitsInto) {
-      this.spawn(enemy.def.splitsInto, false).progress = Math.max(0, enemy.progress - 0.015);
-      this.spawn(enemy.def.splitsInto, false).progress = Math.max(0, enemy.progress - 0.025);
+      const splitCount = enemy.def.splitCount ?? 2;
+      for (let i = 0; i < splitCount; i += 1) {
+        this.spawn(enemy.def.splitsInto, false).progress = Math.max(0, enemy.progress - 0.015 - i * 0.01);
+      }
     }
   }
 
   private leak(enemy: Enemy) {
-    this.state.heartHp -= enemy.def.boss ? 7 : 1;
+    this.state.heartHp -= enemy.def.damageToHeart ?? (enemy.def.boss ? 7 : 1);
     this.state.enemiesRemaining = Math.max(0, this.state.enemiesRemaining - 1);
     enemy.destroy();
     this.enemies.splice(this.enemies.indexOf(enemy), 1);

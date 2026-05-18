@@ -66,6 +66,11 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.hitMemory.set(sourceId, repeatedHits + 1);
     let multiplier = 1;
     if (sourceTags.includes('Fire') && this.def.fireResist) multiplier *= this.def.fireResist;
+    if (sourceTags.includes('Root') && this.def.rootResist) multiplier *= this.def.rootResist;
+    if (sourceTags.includes('Storm') && this.def.stormResist) multiplier *= this.def.stormResist;
+    if (sourceTags.includes('Time') && this.def.timeResist) multiplier *= this.def.timeResist;
+    if (sourceTags.includes('Moon') && this.def.moonResist) multiplier *= this.def.moonResist;
+    if (sourceTags.includes('Alchemy') && this.def.alchemyResist) multiplier *= this.def.alchemyResist;
     if (sourceTags.includes('Shadow') && this.def.shadowWeak) multiplier *= this.def.shadowWeak;
     if (this.hasStatus('frail')) multiplier *= 1.28;
     if (this.hasStatus('marked')) multiplier *= 1.18;
@@ -79,12 +84,13 @@ export class Enemy extends Phaser.GameObjects.Container {
 
   applyStatus(id: StatusId, durationMs: number, power: number) {
     const existing = this.statuses.get(id);
-    this.statuses.set(id, { id, remaining: Math.max(existing?.remaining ?? 0, durationMs), power: Math.max(existing?.power ?? 0, power) });
+    const resistedPower = power * this.statusResistance(id);
+    this.statuses.set(id, { id, remaining: Math.max(existing?.remaining ?? 0, durationMs), power: Math.max(existing?.power ?? 0, resistedPower) });
     this.body.setStrokeStyle(2, this.statusColor(), 1);
   }
 
   rewind(amount: number) {
-    this.progress = clamp(this.progress - amount, 0, 1);
+    this.progress = clamp(this.progress - amount * (1 - (this.def.rewindResist ?? 0)), 0, 1);
   }
 
   hasReachedHeart() {
@@ -110,6 +116,12 @@ export class Enemy extends Phaser.GameObjects.Container {
       if (status.remaining <= 0) this.statuses.delete(id);
     });
     if (this.statuses.size === 0) this.body.setStrokeStyle(2, 0xf7e3ab);
+  }
+
+  private statusResistance(id: StatusId) {
+    if (id === 'burning') return 1 - (this.def.burnResist ?? 0);
+    if (id === 'snared' || id === 'chilled' || id === 'dazed') return 1 - (this.def.slowResist ?? 0);
+    return 1;
   }
 
   private statusColor() {
@@ -193,6 +205,33 @@ export class Enemy extends Phaser.GameObjects.Container {
         g.lineStyle(1, 0xffef9e, 0.9).lineBetween(-18, -13, -24, -18).lineBetween(17, -12, 23, -18);
         this.scene.tweens.add({ targets: [receiptL, receiptR], angle: 12, duration: 180, yoyo: true, repeat: -1, repeatDelay: 260 });
         break;
+      case 'wax_baron':
+        c.add(this.scene.add.ellipse(0, 1, radius * 1.85, radius * 1.95, 0xffc86e, 1).setStrokeStyle(3, 0x6f3b18));
+        c.add(this.scene.add.rectangle(0, -radius - 1, radius * 2.2, 7, 0x6f3b18, 1));
+        c.add(this.scene.add.rectangle(0, -radius - 10, radius * 1.45, 16, 0x4f2611, 1).setStrokeStyle(1, 0xffe0a0));
+        c.add(this.scene.add.triangle(0, -radius - 24, -8, -8, 0, -25, 8, -8, 0xff7438, 1));
+        c.add(this.scene.add.circle(-6, -4, 2.4, 0x281107));
+        c.add(this.scene.add.circle(7, -4, 2.4, 0x281107));
+        g.lineStyle(2, 0x7a3514, 1).lineBetween(-11, 6, 11, 6).lineBetween(-18, 2, -27, -7).lineBetween(18, 2, 27, -7);
+        break;
+      case 'ink_duchess':
+        const dressL = this.scene.add.triangle(-12, 4, 0, -11, -33, -20, -10, 18, 0x191326, 1).setStrokeStyle(2, 0x7b6bd6);
+        const dressR = this.scene.add.triangle(12, 4, 0, -11, 33, -20, 10, 18, 0x191326, 1).setStrokeStyle(2, 0x7b6bd6);
+        c.add([dressL, dressR]);
+        c.add(this.scene.add.ellipse(0, 0, radius * 1.45, radius * 1.75, 0x5d4fa8, 1).setStrokeStyle(2, 0xd7ceff));
+        c.add(this.scene.add.star(0, -radius - 6, 5, 4, 9, 0xffe577, 1));
+        c.add(this.scene.add.circle(-5, -3, 2.2, 0xffffff));
+        c.add(this.scene.add.circle(6, -3, 2.2, 0xffffff));
+        this.scene.tweens.add({ targets: [dressL, dressR], scaleY: 0.55, duration: 150, yoyo: true, repeat: -1 });
+        break;
+      case 'ledger_lich':
+        c.add(this.scene.add.rectangle(0, 2, radius * 1.65, radius * 1.95, 0xa4ecd9, 1).setStrokeStyle(3, 0x173a36));
+        c.add(this.scene.add.rectangle(0, -3, radius * 1.3, radius * 1.25, 0xf4e6b8, 1).setStrokeStyle(2, 0x173a36));
+        c.add(this.scene.add.circle(-5, -5, 2.4, 0x173a36));
+        c.add(this.scene.add.circle(5, -5, 2.4, 0x173a36));
+        c.add(this.scene.add.text(0, 7, '$', { fontSize: '16px', color: '#173a36', fontStyle: 'bold' }).setOrigin(0.5));
+        g.lineStyle(2, 0xeafff7, 0.8).lineBetween(-18, -16, -29, -22).lineBetween(18, -16, 29, -22).lineBetween(-20, 15, 20, 15);
+        break;
       case 'page_eater':
         g.fillStyle(0xd95f9d, 1).fillRoundedRect(-31, -15, 62, 30, 13);
         g.fillStyle(0xf18bbf, 1).fillRoundedRect(-23, -10, 36, 20, 9);
@@ -204,6 +243,22 @@ export class Enemy extends Phaser.GameObjects.Container {
         const pageB = this.scene.add.rectangle(-8, 22, 24, 7, 0xf4e6b8, 0.9).setRotation(0.22);
         c.add([pageA, pageB]);
         this.scene.tweens.add({ targets: [pageA, pageB], x: '+=5', angle: 18, duration: 210, yoyo: true, repeat: -1, repeatDelay: 180 });
+        break;
+      case 'starved_atlas':
+        g.fillStyle(0x4c8d56, 1).fillRoundedRect(-33, -20, 66, 40, 8);
+        g.lineStyle(3, 0xd7f5a3, 1).strokeRoundedRect(-33, -20, 66, 40, 8);
+        g.lineStyle(2, 0xd7f5a3, 0.95).lineBetween(0, -18, 0, 18).lineBetween(-25, -8, -5, 6).lineBetween(7, -10, 27, 5);
+        c.add(this.scene.add.circle(-17, -5, 4, 0xfff0bd));
+        c.add(this.scene.add.circle(18, -4, 4, 0xfff0bd));
+        c.add(this.scene.add.rectangle(0, 24, 54, 8, 0x7fcf83, 0.8));
+        break;
+      case 'null_clock':
+        c.add(this.scene.add.circle(0, 0, radius * 1.45, 0x8fb8ff, 1).setStrokeStyle(3, 0x243052));
+        c.add(this.scene.add.circle(0, 0, radius * 0.95, 0x182033, 1).setStrokeStyle(2, 0xd9f1ff));
+        g.lineStyle(3, 0xd9f1ff, 1).lineBetween(0, 0, 0, -15).lineBetween(0, 0, 13, 7);
+        g.lineStyle(2, 0xffe577, 0.9).lineBetween(-26, -18, -38, -26).lineBetween(26, -18, 38, -26).lineBetween(-22, 18, -34, 28).lineBetween(22, 18, 34, 28);
+        c.add(this.scene.add.circle(0, 0, 3, 0xffe577));
+        this.scene.tweens.add({ targets: c, angle: 360, duration: 3800, repeat: -1 });
         break;
       default:
         break;

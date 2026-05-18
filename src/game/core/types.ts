@@ -17,7 +17,12 @@ export type EnemyId =
   | 'winged_inkling'
   | 'clockwork_wyvern'
   | 'curse_collector'
-  | 'page_eater';
+  | 'wax_baron'
+  | 'ink_duchess'
+  | 'ledger_lich'
+  | 'page_eater'
+  | 'starved_atlas'
+  | 'null_clock';
 
 export type StatusId = 'burning' | 'snared' | 'frail' | 'dazed' | 'chilled' | 'marked';
 export type TargetPriority = 'first' | 'last' | 'strongest' | 'weakest' | 'fastest';
@@ -53,9 +58,19 @@ export interface EnemyDefinition {
   flavor: string;
   color: number;
   fireResist?: number;
+  rootResist?: number;
+  stormResist?: number;
+  timeResist?: number;
+  moonResist?: number;
+  alchemyResist?: number;
   shadowWeak?: number;
+  slowResist?: number;
+  burnResist?: number;
+  rewindResist?: number;
+  damageToHeart?: number;
   flying?: boolean;
   splitsInto?: EnemyId;
+  splitCount?: number;
   boss?: boolean;
 }
 

@@ -40,7 +40,7 @@ const steps: TutorialStep[] = [
   },
   {
     title: 'Upgrade and survive',
-    body: 'Click a built room to upgrade, sell, or change targeting. After every two waves, choose a tower mutation. Survive wave 10 to win.',
+    body: 'Click a built room to upgrade, sell, or change targeting. After every two waves, choose a tower mutation. Survive wave 18 to win.',
     x: 690,
     y: 360,
   },
