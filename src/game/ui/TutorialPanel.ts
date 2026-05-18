@@ -52,7 +52,7 @@ export class TutorialPanel extends Phaser.GameObjects.Container {
   private bodyText: Phaser.GameObjects.Text;
   private countText: Phaser.GameObjects.Text;
   private back: Phaser.GameObjects.Text;
-  private next: Phaser.GameObjects.Text;
+  private nextButton: Phaser.GameObjects.Text;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
@@ -61,11 +61,11 @@ export class TutorialPanel extends Phaser.GameObjects.Container {
     this.bodyText = scene.add.text(18, 52, '', { fontSize: '14px', color: '#fff0cf', wordWrap: { width: 310 }, lineSpacing: 4 });
     this.countText = scene.add.text(18, 156, '', { fontSize: '13px', color: '#cbb9e2' });
     this.back = this.button(188, 148, 'Back');
-    this.next = this.button(260, 148, 'Next');
-    this.add([this.title, this.bodyText, this.countText, this.back, this.next]);
+    this.nextButton = this.button(260, 148, 'Next');
+    this.add([this.title, this.bodyText, this.countText, this.back, this.nextButton]);
     this.setDepth(650);
     this.back.on('pointerdown', () => this.go(-1));
-    this.next.on('pointerdown', () => {
+    this.nextButton.on('pointerdown', () => {
       if (this.index >= steps.length - 1) {
         this.setVisible(false);
         return;
@@ -94,7 +94,7 @@ export class TutorialPanel extends Phaser.GameObjects.Container {
     this.bodyText.setText(step.body);
     this.countText.setText(`${this.index + 1} / ${steps.length}`);
     this.back.setAlpha(this.index === 0 ? 0.4 : 1);
-    this.next.setText(this.index === steps.length - 1 ? 'Done' : 'Next');
+    this.nextButton.setText(this.index === steps.length - 1 ? 'Done' : 'Next');
   }
 
   private button(x: number, y: number, label: string) {
