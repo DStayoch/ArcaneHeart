@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { createGameState, type GameState } from '../core/GameState';
 import { enemyDefinitions } from '../data/enemies';
-import { roomDefinitions } from '../data/rooms';
 import type { BuildSlot } from '../entities/BuildSlot';
 import type { Room } from '../entities/Room';
 import { BuildSystem } from '../systems/BuildSystem';
@@ -49,6 +48,8 @@ export class GameScene extends Phaser.Scene {
   private fx!: VisualEffectsSystem;
   private selectedRoom?: Room;
   private moveRoomSelection?: Room;
+  private roomInfoHideTimer?: Phaser.Time.TimerEvent;
+  private roomInfoHovered = false;
   private ready = false;
 
   constructor() {
@@ -108,7 +109,6 @@ export class GameScene extends Phaser.Scene {
       this.build.consumeFusion(anchor, contributors, combo, this.tower.slots);
       if (this.selectedRoom && contributors.includes(this.selectedRoom)) {
         this.selectedRoom = anchor;
-        this.roomInfo.refresh(anchor);
       }
     });
     this.wavePreview = new WavePreview(this, this.waves);
@@ -123,7 +123,7 @@ export class GameScene extends Phaser.Scene {
       this.buildMenu.close();
       this.selectedRoom = room;
       this.moveRoomSelection = undefined;
-      this.roomInfo.refresh(room);
+      this.hideRoomInfo();
       this.refreshUi();
     };
     this.buildMenu.onHover = (x, y, text) => this.tooltip.show(x, y, text);
@@ -134,13 +134,18 @@ export class GameScene extends Phaser.Scene {
         this.audio.play('build');
         this.fx.roomUpgraded(room);
       }
-      this.roomInfo.refresh(room);
+      this.showRoomInfo(room);
     };
     this.roomInfo.onSell = (room) => {
       this.build.sell(room, this.tower.slots);
       this.audio.play('sell');
       this.selectedRoom = undefined;
-      this.roomInfo.refresh();
+      this.hideRoomInfo();
+    };
+    this.roomInfo.onHoverChange = (hovered) => {
+      this.roomInfoHovered = hovered;
+      if (hovered) this.roomInfoHideTimer?.remove(false);
+      else this.scheduleRoomInfoHide();
     };
     this.mutationPanel.onChoose = (mutation) => {
       this.mutations.apply(mutation);
@@ -191,10 +196,10 @@ export class GameScene extends Phaser.Scene {
     if (this.moveRoomSelection && !this.state.waveActive && !slot.model.roomId) {
       if (this.build.moveRoom(this.moveRoomSelection, slot, this.tower.slots)) {
         this.selectedRoom = this.moveRoomSelection;
-        this.roomInfo.refresh(this.moveRoomSelection);
         this.tooltip.hide();
         this.moveRoomSelection = undefined;
         this.buildMenu.close();
+        this.hideRoomInfo();
         this.refreshUi();
         return;
       }
@@ -203,14 +208,14 @@ export class GameScene extends Phaser.Scene {
     if (existing) {
       this.selectedRoom = existing;
       this.moveRoomSelection = existing;
-      this.roomInfo.refresh(existing);
+      this.hideRoomInfo();
       this.buildMenu.close();
       return;
     }
     this.buildMenu.open(slot);
     this.selectedRoom = undefined;
     this.moveRoomSelection = undefined;
-    this.roomInfo.refresh();
+    this.hideRoomInfo();
   }
 
   private attachRoomInput(room: Room) {
@@ -218,22 +223,20 @@ export class GameScene extends Phaser.Scene {
       if (room.mergedInto) return;
       this.selectedRoom = room;
       this.moveRoomSelection = room;
-      this.roomInfo.refresh(room);
+      this.hideRoomInfo();
       this.buildMenu.close();
     });
     room.on('pointerover', () => {
-      const def = roomDefinitions[room.def.id];
-      const fusion = room.activeFusion ? `\n\nMERGED: ${room.activeFusion.name}\n${room.activeFusion.description}` : room.mergedInto ? '\n\nAbsorbed into a merged room.' : '';
-      const moveHint = this.state.waveActive ? '\nMove: disabled during waves.' : '\nClick this room, then click any empty slot to move it.';
-      this.tooltip.show(room.x + 58, room.y - 22, `${def.name}\nLevel ${room.level} | ${def.cost} Mana base\n${def.effect}\n${def.personality}${fusion}${moveHint}`);
+      if (room.mergedInto) return;
+      this.showRoomInfo(room);
     });
-    room.on('pointerout', () => this.tooltip.hide());
+    room.on('pointerout', () => this.scheduleRoomInfoHide());
   }
 
   private clearRoomSelection() {
     this.selectedRoom = undefined;
     this.moveRoomSelection = undefined;
-    this.roomInfo.refresh();
+    this.hideRoomInfo();
   }
 
   private completeWave() {
@@ -260,7 +263,24 @@ export class GameScene extends Phaser.Scene {
   private refreshUi() {
     this.hud.refresh();
     this.wavePreview.refresh();
-    this.roomInfo.refresh(this.selectedRoom);
+  }
+
+  private showRoomInfo(room: Room) {
+    this.roomInfoHideTimer?.remove(false);
+    this.roomInfo.refresh(room);
+    this.roomInfo.setVisible(true);
+  }
+
+  private scheduleRoomInfoHide() {
+    this.roomInfoHideTimer?.remove(false);
+    this.roomInfoHideTimer = this.time.delayedCall(120, () => {
+      if (!this.roomInfoHovered) this.hideRoomInfo();
+    });
+  }
+
+  private hideRoomInfo() {
+    this.roomInfoHideTimer?.remove(false);
+    this.roomInfo.setVisible(false);
   }
 
   private decorateBackground() {

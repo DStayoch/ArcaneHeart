@@ -37,7 +37,7 @@ export class Hud extends Phaser.GameObjects.Container {
     this.restartButton = this.button(970, 10, 'Restart');
     this.comboTitle = scene.add.text(930, 90, 'Active Fusions', { fontSize: '13px', color: '#bdf4ff', fontStyle: 'bold' });
     this.currentWaveText = scene.add.text(930, 174, '', { fontSize: '13px', color: '#f6e8ce', wordWrap: { width: 300 }, lineSpacing: 6 });
-    this.mutations = scene.add.text(930, 354, '', { fontSize: '13px', color: '#d8c0ff', wordWrap: { width: 300 }, lineSpacing: 6 });
+    this.mutations = scene.add.text(930, 586, '', { fontSize: '12px', color: '#d8c0ff', wordWrap: { width: 300 }, lineSpacing: 4 });
     scene.add.existing(this);
   }
 
@@ -53,7 +53,10 @@ export class Hud extends Phaser.GameObjects.Container {
     this.pauseButton.setText(this.state.paused ? 'Resume' : 'Pause');
     this.refreshComboRows();
     this.currentWaveText.setText(`Current Wave\n${wave?.title ?? 'Complete'}`);
-    this.mutations.setText(`Tower Moods\n${this.state.activeMutations.map((mutation) => mutation.name).join('\n') || 'The tower is listening.'}`);
+    const moods = this.state.activeMutations.map((mutation) => mutation.name);
+    const visibleMoods = moods.slice(-5);
+    const hiddenMoodCount = moods.length - visibleMoods.length;
+    this.mutations.setText(`Tower Moods\n${visibleMoods.join('\n') || 'The tower is listening.'}${hiddenMoodCount > 0 ? `\n+${hiddenMoodCount} older moods` : ''}`);
   }
 
   private refreshComboRows() {

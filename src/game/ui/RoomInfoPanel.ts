@@ -11,6 +11,7 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
   private signature = '__unrendered__';
   onUpgrade?: (room: Room) => void;
   onSell?: (room: Room) => void;
+  onHoverChange?: (hovered: boolean) => void;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 918, 360);
@@ -28,6 +29,12 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
       this.refresh(this.room);
     });
     this.add([panel, this.copy, upgrade, sell, target]);
+    this.setDepth(220);
+    this.setSize(330, 208);
+    this.setInteractive(new Phaser.Geom.Rectangle(0, 0, 330, 208), Phaser.Geom.Rectangle.Contains);
+    this.on('pointerover', () => this.onHoverChange?.(true));
+    this.on('pointerout', () => this.onHoverChange?.(false));
+    this.setVisible(false);
     scene.add.existing(this);
   }
 
