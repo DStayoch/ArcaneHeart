@@ -25,7 +25,7 @@ export type EnemyId =
   | 'null_clock';
 
 export type StatusId = 'burning' | 'snared' | 'frail' | 'dazed' | 'chilled' | 'marked';
-export type TargetPriority = 'first' | 'last' | 'strongest' | 'weakest' | 'fastest';
+export type TargetPriority = 'first' | 'last' | 'strongest' | 'weakest' | 'fastest' | 'cluster' | 'boss' | 'burning' | 'unmarked';
 export type SlotSide = (typeof SLOT_SIDES)[number];
 
 export interface RoomDefinition {

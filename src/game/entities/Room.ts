@@ -7,6 +7,7 @@ export class Room extends Phaser.GameObjects.Container {
   readonly def: RoomDefinition;
   level = 1;
   priority: TargetPriority = 'first';
+  upgradeFocus: 'Power' | 'Reach' = 'Power';
   cooldownRemaining = 0;
   slotId: string;
   floor: number;
@@ -43,16 +44,19 @@ export class Room extends Phaser.GameObjects.Container {
 
   damage() {
     const fusionBoost = this.evolvedFusion ? 1.45 : 1;
-    return this.def.baseDamage * (this.level === 1 ? 1 : this.level === 2 ? 1.3 : 1.6) * fusionBoost;
+    const focusBoost = this.upgradeFocus === 'Power' ? 1 + (this.level - 1) * 0.12 : 1;
+    return this.def.baseDamage * (this.level === 1 ? 1 : this.level === 2 ? 1.3 : 1.6) * fusionBoost * focusBoost;
   }
 
   range() {
-    return this.def.range * (this.def.tags.includes('Storm') || this.def.tags.includes('Moon') ? 1.03 : 1);
+    const focusBoost = this.upgradeFocus === 'Reach' ? 1 + (this.level - 1) * 0.1 : 1;
+    return this.def.range * (this.def.tags.includes('Storm') || this.def.tags.includes('Moon') ? 1.03 : 1) * focusBoost;
   }
 
   cooldown() {
     const supportBoost = this.level === 3 ? 0.86 : 1;
-    return this.def.cooldownMs * supportBoost * (this.evolvedFusion ? 0.84 : 1);
+    const focusBoost = this.upgradeFocus === 'Reach' ? 0.94 : 1;
+    return this.def.cooldownMs * supportBoost * (this.evolvedFusion ? 0.84 : 1) * focusBoost;
   }
 
   upgradeCost() {
@@ -71,6 +75,11 @@ export class Room extends Phaser.GameObjects.Container {
     this.bg.setStrokeStyle(this.level === 2 ? 3 : 4, this.level === 2 ? 0xfff0bd : 0xffffff, 1);
     this.model.setScale(this.level === 2 ? 1.09 : 1.18);
     this.scene.tweens.add({ targets: this, scaleX: 1.12, scaleY: 1.12, yoyo: true, duration: 120 });
+  }
+
+  toggleUpgradeFocus() {
+    this.upgradeFocus = this.upgradeFocus === 'Power' ? 'Reach' : 'Power';
+    this.scene.tweens.add({ targets: this, angle: this.upgradeFocus === 'Reach' ? 2 : -2, duration: 70, yoyo: true });
   }
 
   setFusionActive(active: boolean, color = 0xbdf4ff) {
