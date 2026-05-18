@@ -293,7 +293,7 @@ export class Room extends Phaser.GameObjects.Container {
     this.scene.tweens.add({ targets: target, scale, alpha: 0.35, duration, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
-  private floatBubble(target: Phaser.GameObjects.GameObject & { y: number; alpha: number }, distance: number, duration: number) {
+  private floatBubble(target: Phaser.GameObjects.GameObject & { y: number; alpha: number; setScale: (x: number, y?: number) => Phaser.GameObjects.GameObject }, distance: number, duration: number) {
     const startY = target.y;
     this.scene.tweens.add({
       targets: target,

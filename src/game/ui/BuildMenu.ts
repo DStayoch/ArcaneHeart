@@ -18,7 +18,7 @@ export class BuildMenu extends Phaser.GameObjects.Container {
   onHover?: (x: number, y: number, text: string) => void;
   onOut?: () => void;
 
-  constructor(scene: Phaser.Scene, private state: GameState) {
+  constructor(scene: Phaser.Scene, private gameState: GameState) {
     super(scene, 24, 70);
     const panel = scene.add.rectangle(0, 0, 302, 500, 0x120b19, 0.93).setOrigin(0).setStrokeStyle(2, 0x8d6ea7);
     this.title = scene.add.text(14, 12, 'Choose a room', { fontSize: '18px', color: '#ffe6a6', fontStyle: 'bold' });
@@ -26,7 +26,7 @@ export class BuildMenu extends Phaser.GameObjects.Container {
     roomList.forEach((room, index) => {
       const y = 48 + index * 54;
       const card = scene.add.container(14, y);
-      const affordable = () => this.state.mana >= room.cost;
+      const affordable = () => this.gameState.mana >= room.cost;
       const bg = scene.add.rectangle(0, 0, 274, 46, room.color, 0.8).setOrigin(0).setStrokeStyle(1, 0xffe6a6, 0.7);
       const text = scene.add.text(10, 6, `${room.icon} ${room.name} - ${room.cost} Mana\n${tagsText(room.tags)}`, { fontSize: '12px', color: '#140d19' });
       card.add([bg, text]);
@@ -63,7 +63,7 @@ export class BuildMenu extends Phaser.GameObjects.Container {
 
   private refreshAffordability() {
     this.cards.forEach(({ bg, text, cost }) => {
-      const affordable = this.state.mana >= cost;
+      const affordable = this.gameState.mana >= cost;
       bg.setAlpha(affordable ? 0.8 : 0.34);
       text.setAlpha(affordable ? 1 : 0.52);
     });

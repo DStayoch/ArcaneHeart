@@ -18,7 +18,7 @@ export class Enemy extends Phaser.GameObjects.Container {
   progress = 0;
   alive = true;
   hitMemory = new Map<string, number>();
-  private body: Phaser.GameObjects.Ellipse;
+  private bodyShape: Phaser.GameObjects.Ellipse;
   private label: Phaser.GameObjects.Text;
   private bar: Phaser.GameObjects.Rectangle;
   private statuses = new Map<StatusId, StatusState>();
@@ -38,11 +38,11 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.maxHp = this.def.hp * healthScale * (elite ? 1.75 : 1);
     this.hp = this.maxHp;
     const radius = this.def.boss ? 22 : elite ? 17 : 13;
-    this.body = scene.add.ellipse(0, 3, radius * 2.2, radius * 1.65, this.def.color, 0.28).setStrokeStyle(1, 0xf7e3ab, 0.45);
+    this.bodyShape = scene.add.ellipse(0, 3, radius * 2.2, radius * 1.65, this.def.color, 0.28).setStrokeStyle(1, 0xf7e3ab, 0.45);
     const details = this.createModel(radius);
     this.label = scene.add.text(0, radius + 13, this.def.icon, { fontSize: this.def.boss ? '11px' : '9px', color: '#fff9e5', fontStyle: 'bold' }).setOrigin(0.5).setAlpha(0.75);
     this.bar = scene.add.rectangle(0, radius + 6, radius * 2, 4, 0x5eff9a).setOrigin(0.5);
-    this.add([this.body, details, this.label, this.bar]);
+    this.add([this.bodyShape, details, this.label, this.bar]);
     scene.add.existing(this);
   }
 
@@ -77,7 +77,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     const collectorArmor = this.def.id === 'curse_collector' ? Math.floor(repeatedHits / 3) : 0;
     const final = Math.max(1, amount * multiplier - (this.def.armor ?? 0) - this.armorScale - collectorArmor);
     this.hp -= final;
-    this.scene.tweens.add({ targets: this.body, scaleX: 1.25, scaleY: 1.25, yoyo: true, duration: 70 });
+    this.scene.tweens.add({ targets: this.bodyShape, scaleX: 1.25, scaleY: 1.25, yoyo: true, duration: 70 });
     if (this.hp <= 0) this.alive = false;
     return final;
   }
@@ -86,7 +86,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     const existing = this.statuses.get(id);
     const resistedPower = power * this.statusResistance(id);
     this.statuses.set(id, { id, remaining: Math.max(existing?.remaining ?? 0, durationMs), power: Math.max(existing?.power ?? 0, resistedPower) });
-    this.body.setStrokeStyle(2, this.statusColor(), 1);
+    this.bodyShape.setStrokeStyle(2, this.statusColor(), 1);
   }
 
   rewind(amount: number) {
@@ -115,7 +115,7 @@ export class Enemy extends Phaser.GameObjects.Container {
       if (id === 'burning') this.applyDamage(status.power * deltaMs / 1000, ['Fire'], 'burning');
       if (status.remaining <= 0) this.statuses.delete(id);
     });
-    if (this.statuses.size === 0) this.body.setStrokeStyle(2, 0xf7e3ab);
+    if (this.statuses.size === 0) this.bodyShape.setStrokeStyle(2, 0xf7e3ab);
   }
 
   private statusResistance(id: StatusId) {
