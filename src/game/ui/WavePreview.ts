@@ -3,6 +3,8 @@ import type { WaveSystem } from '../systems/WaveSystem';
 import { enemyDefinitions } from '../data/enemies';
 
 export class WavePreview extends Phaser.GameObjects.Text {
+  private signature = '__unrendered__';
+
   constructor(scene: Phaser.Scene, private waves: WaveSystem) {
     super(scene, 930, 226, '', { fontSize: '13px', color: '#f6e8ce', wordWrap: { width: 300 }, lineSpacing: 6 });
     scene.add.existing(this);
@@ -10,6 +12,9 @@ export class WavePreview extends Phaser.GameObjects.Text {
 
   refresh() {
     const wave = this.waves.getCurrentWave();
+    const signature = wave ? `${wave.wave}:${wave.entries.map((entry) => `${entry.enemyId}-${entry.count}-${entry.elite ? 1 : 0}`).join('|')}` : 'complete';
+    if (signature === this.signature) return;
+    this.signature = signature;
     if (!wave) {
       this.setText('All chapters survived.');
       return;

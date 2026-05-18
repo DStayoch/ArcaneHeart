@@ -18,7 +18,6 @@ export class BuildSlot extends Phaser.GameObjects.Container {
   }
 
   setRoomLabel(text: string, color: number) {
-    this.model.roomId = this.model.roomId;
     this.bg.setFillStyle(color, 0.78).setStrokeStyle(2, 0xfff0bd, 0.9);
     this.label.setText(text).setColor('#120d18');
   }
@@ -29,6 +28,7 @@ export class BuildSlot extends Phaser.GameObjects.Container {
   }
 
   setPreview(on: boolean) {
-    this.bg.setStrokeStyle(on ? 3 : 2, on ? 0xffe28a : 0x8267a6, on ? 1 : 0.7);
+    const occupied = Boolean(this.model.roomId);
+    this.bg.setStrokeStyle(on ? 3 : 2, on ? 0xffe28a : occupied ? 0xfff0bd : 0x8267a6, on || occupied ? 1 : 0.7);
   }
 }

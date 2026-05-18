@@ -9,6 +9,7 @@ export class ComboSystem {
   private lines: Phaser.GameObjects.Graphics;
   private sigils: Phaser.GameObjects.GameObject[] = [];
   private previous = new Set<string>();
+  private sigilSignature = '';
 
   constructor(
     private scene: Phaser.Scene,
@@ -21,17 +22,17 @@ export class ComboSystem {
 
   update(rooms: Room[]) {
     const active: ComboDefinition[] = [];
+    const sigils: Array<{ combo: ComboDefinition; rooms: Room[]; color: number }> = [];
     this.lines.clear();
-    this.sigils.forEach((sigil) => sigil.destroy());
-    this.sigils = [];
     const used = new Set<Room>();
     rooms.forEach((room) => room.setFusionRole(undefined, 'none'));
     rooms.filter((room) => room.fusedCombo).forEach((room) => {
       if (!room.fusedCombo) return;
+      const color = room.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff;
       active.push(room.fusedCombo);
       used.add(room);
-      room.setFusionRole(room.fusedCombo, 'anchor', room.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff, room.homeX, room.homeY);
-      this.drawFusion(room.fusedCombo, [room], room.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff);
+      room.setFusionRole(room.fusedCombo, 'anchor', color, room.homeX, room.homeY);
+      sigils.push({ combo: room.fusedCombo, rooms: [room], color });
     });
     const orderedCombos = [...comboDefinitions].sort((a, b) => b.roomIds.length - a.roomIds.length);
     for (const combo of orderedCombos) {
@@ -43,10 +44,11 @@ export class ComboSystem {
         const [anchor, ...contributors] = fusionRooms;
         anchor.becomeFusedChild(combo, color);
         this.onMerge?.(anchor, contributors, combo);
-        this.drawFusion(combo, [anchor], color);
+        sigils.push({ combo, rooms: [anchor], color });
         if (!this.previous.has(combo.id)) this.fx?.fusionActivated(combo, fusionRooms);
       }
     }
+    this.renderSigils(sigils);
     this.previous = new Set(active.map((combo) => combo.id));
     return active;
   }
@@ -86,6 +88,17 @@ export class ComboSystem {
     sigil.on('pointerout', () => this.tooltip?.hide());
     this.scene.tweens.add({ targets: sigil, angle: 360, duration: 2400, repeat: -1 });
     this.sigils.push(sigil);
+  }
+
+  private renderSigils(entries: Array<{ combo: ComboDefinition; rooms: Room[]; color: number }>) {
+    const signature = entries
+      .map((entry) => `${entry.combo.id}:${entry.rooms.map((room) => room.id).join(',')}:${entry.color}`)
+      .join('|');
+    if (signature === this.sigilSignature) return;
+    this.sigils.forEach((sigil) => sigil.destroy());
+    this.sigils = [];
+    this.sigilSignature = signature;
+    entries.forEach((entry) => this.drawFusion(entry.combo, entry.rooms, entry.color));
   }
 
   private mergedPosition(rooms: Room[]) {

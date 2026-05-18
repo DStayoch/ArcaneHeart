@@ -192,7 +192,8 @@ export class GameScene extends Phaser.Scene {
         this.roomInfo.refresh(this.moveRoomSelection);
         this.tooltip.hide();
         this.moveRoomSelection = undefined;
-        this.clearRoomSelection();
+        this.buildMenu.close();
+        this.refreshUi();
         return;
       }
     }

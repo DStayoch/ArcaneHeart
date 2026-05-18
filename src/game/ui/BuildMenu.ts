@@ -6,7 +6,12 @@ import type { RoomId } from '../core/types';
 import { tagsText } from '../utils/formatting';
 
 export class BuildMenu extends Phaser.GameObjects.Container {
-  private cards: Phaser.GameObjects.Container[] = [];
+  private cards: Array<{
+    card: Phaser.GameObjects.Container;
+    bg: Phaser.GameObjects.Rectangle;
+    text: Phaser.GameObjects.Text;
+    cost: number;
+  }> = [];
   private title: Phaser.GameObjects.Text;
   private activeSlot?: BuildSlot;
   onBuild?: (slot: BuildSlot, roomId: RoomId) => void;
@@ -30,14 +35,14 @@ export class BuildMenu extends Phaser.GameObjects.Container {
         if (this.activeSlot && affordable()) this.onBuild?.(this.activeSlot, room.id);
       });
       card.on('pointerover', () => {
-        bg.setAlpha(1);
+        bg.setAlpha(affordable() ? 1 : 0.42);
         this.onHover?.(340, 86 + index * 54, `${room.name}\n${room.effect}\n${room.personality}\nCombo hints: try ${room.tags.includes('Fire') ? 'Mirror Hatchery or Cauldron Nursery' : room.tags.includes('Root') ? 'Moon Bell or Clockwork Orrery' : 'adjacent Noun/Verb/Modifier rooms'}.`);
       });
       card.on('pointerout', () => {
-        bg.setAlpha(0.8);
+        bg.setAlpha(affordable() ? 0.8 : 0.34);
         this.onOut?.();
       });
-      this.cards.push(card);
+      this.cards.push({ card, bg, text, cost: room.cost });
       this.add(card);
     });
     this.setDepth(200).setVisible(false);
@@ -47,11 +52,20 @@ export class BuildMenu extends Phaser.GameObjects.Container {
   open(slot: BuildSlot) {
     this.activeSlot = slot;
     this.title.setText(`Floor ${10 - slot.model.floor} ${slot.model.side}`);
+    this.refreshAffordability();
     this.setVisible(true);
   }
 
   close() {
     this.activeSlot = undefined;
     this.setVisible(false);
+  }
+
+  private refreshAffordability() {
+    this.cards.forEach(({ bg, text, cost }) => {
+      const affordable = this.state.mana >= cost;
+      bg.setAlpha(affordable ? 0.8 : 0.34);
+      text.setAlpha(affordable ? 1 : 0.52);
+    });
   }
 }

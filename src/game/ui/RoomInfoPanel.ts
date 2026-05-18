@@ -8,6 +8,7 @@ const priorities: TargetPriority[] = ['first', 'last', 'strongest', 'weakest', '
 export class RoomInfoPanel extends Phaser.GameObjects.Container {
   private copy: Phaser.GameObjects.Text;
   private room?: Room;
+  private signature = '__unrendered__';
   onUpgrade?: (room: Room) => void;
   onSell?: (room: Room) => void;
 
@@ -33,9 +34,14 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
   refresh(room?: Room) {
     this.room = room;
     if (!room) {
+      if (this.signature === 'empty') return;
+      this.signature = 'empty';
       this.copy.setText('Select a room for upgrades.');
       return;
     }
+    const signature = `${room.id}:${room.level}:${room.priority}:${room.activeFusion?.id ?? ''}:${room.mergedInto ?? ''}`;
+    if (signature === this.signature) return;
+    this.signature = signature;
     this.copy.setText(`${room.def.name}   Level ${room.level}\n${tagsText(room.def.tags)}\nDamage ${Math.round(room.damage())}  Range ${Math.round(room.range())}\n${room.def.effect}\nUpgrade ${room.level >= 3 ? 'MAX' : `${room.upgradeCost()} Mana`}   Sell ${room.sellValue()} Mana\nTargeting: ${room.priority}`);
   }
 

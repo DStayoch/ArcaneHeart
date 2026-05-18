@@ -12,6 +12,7 @@ export class Hud extends Phaser.GameObjects.Container {
   private remainingText: Phaser.GameObjects.Text;
   private comboTitle: Phaser.GameObjects.Text;
   private comboRows: Phaser.GameObjects.Text[] = [];
+  private comboSignature = '__unrendered__';
   private currentWaveText: Phaser.GameObjects.Text;
   private mutations: Phaser.GameObjects.Text;
   readonly tutorialButton: Phaser.GameObjects.Text;
@@ -56,6 +57,9 @@ export class Hud extends Phaser.GameObjects.Container {
   }
 
   private refreshComboRows() {
+    const signature = this.state.activeCombos.map((combo) => combo.id).join('|');
+    if (signature === this.comboSignature) return;
+    this.comboSignature = signature;
     this.comboRows.forEach((row) => row.destroy());
     this.comboRows = [];
     const combos = this.state.activeCombos;

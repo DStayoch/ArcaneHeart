@@ -31,9 +31,9 @@ export class EnemySystem {
   }
 
   update(deltaMs: number) {
-    const speedMultiplier = this.state.paused ? 0 : this.state.speed;
+    const scaledDelta = this.state.paused ? 0 : deltaMs * this.state.speed;
     for (const enemy of [...this.enemies]) {
-      enemy.updateEnemy(deltaMs, speedMultiplier);
+      enemy.updateEnemy(scaledDelta, 1);
       if (!enemy.alive) this.kill(enemy);
       if (enemy.alive && enemy.hasReachedHeart()) this.leak(enemy);
     }

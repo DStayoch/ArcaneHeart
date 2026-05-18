@@ -45,13 +45,15 @@ export class ProjectileSystem {
     g.lineStyle(3, 0xaed7ff, 0.95).lineBetween(room.x, room.y, target.x, target.y);
     target.applyDamage(damage, room.def.tags, room.id);
     let last = target;
+    const hit = new Set<Enemy>([target]);
     const enemies = this.scene.registry.get('enemies') as Enemy[] | undefined;
     const chainCount = (room.def.chainTargets ?? 2) + extra + (room.level >= 3 ? 1 : 0);
     for (let i = 0; i < chainCount; i += 1) {
-      const next = enemies?.find((enemy) => enemy.alive && enemy !== last && distance(last, enemy) < 120);
+      const next = enemies?.find((enemy) => enemy.alive && !hit.has(enemy) && distance(last, enemy) < 120);
       if (!next) break;
       g.lineBetween(last.x, last.y, next.x, next.y);
       next.applyDamage(damage * 0.72, room.def.tags, room.id);
+      hit.add(next);
       last = next;
     }
     this.scene.time.delayedCall(130, () => g.destroy());
