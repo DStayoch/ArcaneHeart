@@ -21,7 +21,7 @@ export class Hud extends Phaser.GameObjects.Container {
   readonly speedButton: Phaser.GameObjects.Text;
   readonly restartButton: Phaser.GameObjects.Text;
 
-  constructor(scene: Phaser.Scene, private state: GameState, private waves: WaveSystem, private tooltip?: Tooltip) {
+  constructor(scene: Phaser.Scene, private gameState: GameState, private waves: WaveSystem, private tooltip?: Tooltip) {
     super(scene, 0, 0);
     scene.add.rectangle(0, 0, 1280, 54, 0x120b19, 0.94).setOrigin(0).setStrokeStyle(1, 0x6e557b);
     scene.add.text(14, 15, 'LIVING SPIRE', { fontSize: '16px', color: '#ffe59d', fontStyle: 'bold' });
@@ -43,29 +43,29 @@ export class Hud extends Phaser.GameObjects.Container {
 
   refresh() {
     const wave = this.waves.getCurrentWave();
-    this.manaBadge.setText(`Mana ${this.state.mana}`);
-    this.essenceText.setText(`Essence ${this.state.essence}`);
-    this.heartText.setText(`Heart ${this.state.heartHp}`);
-    this.waveText.setText(`Wave ${this.state.wave}/${this.waves.totalWaves()}`);
-    this.remainingText.setText(`Left ${this.state.enemiesRemaining}`);
-    this.startButton.setAlpha(this.state.waveActive ? 0.45 : 1);
-    this.speedButton.setText(`${this.state.speed}x`);
-    this.pauseButton.setText(this.state.paused ? 'Resume' : 'Pause');
+    this.manaBadge.setText(`Mana ${this.gameState.mana}`);
+    this.essenceText.setText(`Essence ${this.gameState.essence}`);
+    this.heartText.setText(`Heart ${this.gameState.heartHp}`);
+    this.waveText.setText(`Wave ${this.gameState.wave}/${this.waves.totalWaves()}`);
+    this.remainingText.setText(`Left ${this.waves.enemiesLeftInWave()}`);
+    this.startButton.setAlpha(this.gameState.waveActive ? 0.45 : 1);
+    this.speedButton.setText(`${this.gameState.speed}x`);
+    this.pauseButton.setText(this.gameState.paused ? 'Resume' : 'Pause');
     this.refreshComboRows();
     this.currentWaveText.setText(`Current Wave\n${wave?.title ?? 'Complete'}`);
-    const moods = this.state.activeMutations.map((mutation) => mutation.name);
+    const moods = this.gameState.activeMutations.map((mutation) => mutation.name);
     const visibleMoods = moods.slice(-5);
     const hiddenMoodCount = moods.length - visibleMoods.length;
     this.mutations.setText(`Tower Moods\n${visibleMoods.join('\n') || 'The tower is listening.'}${hiddenMoodCount > 0 ? `\n+${hiddenMoodCount} older moods` : ''}`);
   }
 
   private refreshComboRows() {
-    const signature = this.state.activeCombos.map((combo) => combo.id).join('|');
+    const signature = this.gameState.activeCombos.map((combo) => combo.id).join('|');
     if (signature === this.comboSignature) return;
     this.comboSignature = signature;
     this.comboRows.forEach((row) => row.destroy());
     this.comboRows = [];
-    const combos = this.state.activeCombos;
+    const combos = this.gameState.activeCombos;
     if (!combos.length) {
       this.comboRows.push(this.scene.add.text(930, 112, 'None yet', { fontSize: '13px', color: '#7f748f' }));
       return;

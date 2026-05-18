@@ -43,6 +43,11 @@ export class WaveSystem {
     return waves.length;
   }
 
+  enemiesLeftInWave() {
+    if (this.state.waveActive || this.spawning) return this.state.enemiesRemaining + this.queue.length;
+    return this.getCurrentWave()?.entries.reduce((total, entry) => total + entry.count, 0) ?? 0;
+  }
+
   private spawnNext() {
     const next = this.queue.shift();
     if (!next) {
