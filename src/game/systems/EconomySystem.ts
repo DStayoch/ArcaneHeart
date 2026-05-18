@@ -20,4 +20,14 @@ export class EconomySystem {
   addEssence(amount: number) {
     this.state.essence += Math.max(0, Math.round(amount));
   }
+
+  canSpendEssence(cost: number) {
+    return this.state.essence >= cost;
+  }
+
+  spendEssence(cost: number) {
+    if (!this.canSpendEssence(cost)) return false;
+    this.state.essence -= cost;
+    return true;
+  }
 }

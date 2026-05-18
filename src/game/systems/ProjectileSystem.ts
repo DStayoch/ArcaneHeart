@@ -47,12 +47,14 @@ export class ProjectileSystem {
     let last = target;
     const hit = new Set<Enemy>([target]);
     const enemies = this.scene.registry.get('enemies') as Enemy[] | undefined;
-    const chainCount = (room.def.chainTargets ?? 2) + extra + (room.level >= 3 ? 1 : 0);
+    const evolved = room.evolvedFusion;
+    const chainCount = (room.def.chainTargets ?? 2) + extra + (room.level >= 3 ? 1 : 0) + (evolved ? 2 : 0);
     for (let i = 0; i < chainCount; i += 1) {
-      const next = enemies?.find((enemy) => enemy.alive && !hit.has(enemy) && distance(last, enemy) < 120);
+      const next = enemies?.find((enemy) => enemy.alive && !hit.has(enemy) && distance(last, enemy) < (evolved ? 165 : 120));
       if (!next) break;
       g.lineBetween(last.x, last.y, next.x, next.y);
-      next.applyDamage(damage * 0.72, room.def.tags, room.id);
+      next.applyDamage(damage * (evolved ? 0.88 : 0.72), room.def.tags, room.id);
+      if (evolved) next.applyStatus('marked', 1500, 0.14);
       hit.add(next);
       last = next;
     }

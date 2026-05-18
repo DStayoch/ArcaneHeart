@@ -142,6 +142,18 @@ export class GameScene extends Phaser.Scene {
       this.selectedRoom = undefined;
       this.hideRoomInfo();
     };
+    this.roomInfo.onEvolve = (room) => {
+      if (!room.canEvolve()) return;
+      if (!this.economy.spendEssence(room.evolutionCost())) {
+        this.showFloatingText(room.x, room.y - 38, 'Need more Essence', '#d8c0ff');
+        return;
+      }
+      if (room.evolveFusion()) {
+        this.audio.play('combo');
+        this.fx.fusionEvolved(room);
+        this.showRoomInfo(room);
+      }
+    };
     this.roomInfo.onHoverChange = (hovered) => {
       this.roomInfoHovered = hovered;
       if (hovered) this.roomInfoHideTimer?.remove(false);
@@ -273,7 +285,7 @@ export class GameScene extends Phaser.Scene {
 
   private scheduleRoomInfoHide() {
     this.roomInfoHideTimer?.remove(false);
-    this.roomInfoHideTimer = this.time.delayedCall(120, () => {
+    this.roomInfoHideTimer = this.time.delayedCall(420, () => {
       if (!this.roomInfoHovered) this.hideRoomInfo();
     });
   }
@@ -281,6 +293,11 @@ export class GameScene extends Phaser.Scene {
   private hideRoomInfo() {
     this.roomInfoHideTimer?.remove(false);
     this.roomInfo.setVisible(false);
+  }
+
+  private showFloatingText(x: number, y: number, copy: string, color: string) {
+    const text = this.add.text(x, y, copy, { fontSize: '13px', color, fontStyle: 'bold' }).setOrigin(0.5).setDepth(720);
+    this.tweens.add({ targets: text, y: y - 24, alpha: 0, duration: 780, onComplete: () => text.destroy() });
   }
 
   private decorateBackground() {

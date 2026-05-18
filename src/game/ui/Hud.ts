@@ -11,7 +11,7 @@ export class Hud extends Phaser.GameObjects.Container {
   private waveText: Phaser.GameObjects.Text;
   private remainingText: Phaser.GameObjects.Text;
   private comboTitle: Phaser.GameObjects.Text;
-  private comboRows: Phaser.GameObjects.Text[] = [];
+  private comboRows: Phaser.GameObjects.GameObject[] = [];
   private comboSignature = '__unrendered__';
   private currentWaveText: Phaser.GameObjects.Text;
   private mutations: Phaser.GameObjects.Text;
@@ -44,7 +44,7 @@ export class Hud extends Phaser.GameObjects.Container {
   refresh() {
     const wave = this.waves.getCurrentWave();
     this.manaBadge.setText(`Mana ${this.state.mana}`);
-    this.essenceText.setText(`Ess ${this.state.essence}`);
+    this.essenceText.setText(`Essence ${this.state.essence}`);
     this.heartText.setText(`Heart ${this.state.heartHp}`);
     this.waveText.setText(`Wave ${this.state.wave}/${this.waves.totalWaves()}`);
     this.remainingText.setText(`Left ${this.state.enemiesRemaining}`);
@@ -71,10 +71,20 @@ export class Hud extends Phaser.GameObjects.Container {
       return;
     }
     combos.slice(0, 3).forEach((combo, index) => {
-      const row = this.scene.add.text(930, 112 + index * 20, `* ${combo.name}`, { fontSize: '13px', color: '#fff0bd', backgroundColor: '#21162d', padding: { x: 6, y: 3 } }).setInteractive({ useHandCursor: true });
+      const row = this.scene.add.container(930, 112 + index * 26);
+      const bg = this.scene.add.rectangle(0, 0, 292, 22, 0x21162d, 0.92).setOrigin(0).setStrokeStyle(1, 0xe7c982, 0.62);
+      const label = this.scene.add.text(8, 4, `* ${combo.name}`, { fontSize: '13px', color: '#fff0bd', wordWrap: { width: 274, useAdvancedWrap: true } });
+      row.add([bg, label]);
+      row.setSize(292, 22).setInteractive(new Phaser.Geom.Rectangle(0, 0, 292, 22), Phaser.Geom.Rectangle.Contains);
       const roomNames = combo.roomIds.map((id) => roomDefinitions[id].name).join(' + ');
-      row.on('pointerover', () => this.tooltip?.show(925, 118 + index * 20, `${combo.name}\nRooms: ${roomNames}\nEffect: ${combo.description}\nVisual: ${combo.visual}`));
-      row.on('pointerout', () => this.tooltip?.hide());
+      row.on('pointerover', () => {
+        bg.setStrokeStyle(2, 0xffe28a, 1);
+        this.tooltip?.show(925, 118 + index * 26, `${combo.name}\nRooms: ${roomNames}\nEffect: ${combo.description}\nVisual: ${combo.visual}`);
+      });
+      row.on('pointerout', () => {
+        bg.setStrokeStyle(1, 0xe7c982, 0.62);
+        this.tooltip?.hide();
+      });
       this.comboRows.push(row);
     });
   }

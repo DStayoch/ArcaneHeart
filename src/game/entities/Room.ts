@@ -12,6 +12,7 @@ export class Room extends Phaser.GameObjects.Container {
   floor: number;
   activeFusion?: ComboDefinition;
   fusedCombo?: ComboDefinition;
+  evolvedFusion = false;
   mergedInto?: string;
   homeX: number;
   homeY: number;
@@ -20,6 +21,7 @@ export class Room extends Phaser.GameObjects.Container {
   private model: Phaser.GameObjects.Container;
   private upgradeGlow: Phaser.GameObjects.Ellipse;
   private fusionGlow?: Phaser.GameObjects.Ellipse;
+  private evolutionCrown?: Phaser.GameObjects.Star;
 
   constructor(scene: Phaser.Scene, roomId: RoomId, slotId: string, floor: number, x: number, y: number) {
     super(scene, x, y);
@@ -40,7 +42,8 @@ export class Room extends Phaser.GameObjects.Container {
   }
 
   damage() {
-    return this.def.baseDamage * (this.level === 1 ? 1 : this.level === 2 ? 1.3 : 1.6);
+    const fusionBoost = this.evolvedFusion ? 1.45 : 1;
+    return this.def.baseDamage * (this.level === 1 ? 1 : this.level === 2 ? 1.3 : 1.6) * fusionBoost;
   }
 
   range() {
@@ -49,7 +52,7 @@ export class Room extends Phaser.GameObjects.Container {
 
   cooldown() {
     const supportBoost = this.level === 3 ? 0.86 : 1;
-    return this.def.cooldownMs * supportBoost;
+    return this.def.cooldownMs * supportBoost * (this.evolvedFusion ? 0.84 : 1);
   }
 
   upgradeCost() {
@@ -90,9 +93,9 @@ export class Room extends Phaser.GameObjects.Container {
       this.setAlpha(1);
       this.setPosition(mergedX, mergedY);
       this.setScale(1);
-      this.text.setText(`${combo.name.split(' ').map((word) => word[0]).join('')} ${this.level}`);
+      this.text.setText(`${combo.name.split(' ').map((word) => word[0]).join('')}${this.evolvedFusion ? '+' : ''} ${this.level}`);
       this.bg.setSize(92, 38);
-      this.bg.setFillStyle(color, 0.92).setStrokeStyle(4, 0xffffff, 1);
+      this.bg.setFillStyle(color, this.evolvedFusion ? 1 : 0.92).setStrokeStyle(this.evolvedFusion ? 5 : 4, this.evolvedFusion ? 0xffe28a : 0xffffff, 1);
       this.disableInteractive();
       this.setInteractive({ useHandCursor: true });
     } else if (role === 'contributor') {
@@ -121,6 +124,45 @@ export class Room extends Phaser.GameObjects.Container {
   becomeFusedChild(combo: ComboDefinition, color = 0xbdf4ff) {
     this.fusedCombo = combo;
     this.setFusionRole(combo, 'anchor', color, this.homeX, this.homeY);
+  }
+
+  evolutionCost() {
+    if (!this.fusedCombo) return 0;
+    return this.fusedCombo.roomIds.length >= 3 ? 4 : 2;
+  }
+
+  evolutionTitle() {
+    if (!this.fusedCombo) return 'Unfused Room';
+    const titles: Record<string, string> = {
+      lunar_brambles: 'Moonroot Crown',
+      prismatic_fireflies: 'Prismatic Hive',
+      funeral_chime: 'Requiem Engine',
+      time_grown_thorns: 'Chronovine Engine',
+      echo_lightning: 'Thunder Mirror Choir',
+      spicy_stew_economy: 'Volcanic Nursery',
+      solar_orchard: 'Sunheart Orchard',
+    };
+    return titles[this.fusedCombo.id] ?? `Greater ${this.fusedCombo.name}`;
+  }
+
+  canEvolve() {
+    return Boolean(this.fusedCombo && !this.evolvedFusion);
+  }
+
+  evolveFusion() {
+    if (!this.fusedCombo || this.evolvedFusion) return false;
+    this.evolvedFusion = true;
+    const color = this.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff;
+    this.setFusionRole(this.fusedCombo, 'anchor', color, this.homeX, this.homeY);
+    this.upgradeGlow.setFillStyle(0xffe28a, 0.42).setAlpha(0.5);
+    this.model.setScale(Math.max(this.model.scaleX, 1.18));
+    if (!this.evolutionCrown) {
+      this.evolutionCrown = this.scene.add.star(-39, -14, 7, 4, 10, 0xffe28a, 0.94).setStrokeStyle(1, 0xffffff, 0.9);
+      this.add(this.evolutionCrown);
+      this.scene.tweens.add({ targets: this.evolutionCrown, angle: 360, scale: 1.18, duration: 1700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+    this.scene.tweens.add({ targets: this, scaleX: 1.18, scaleY: 1.18, yoyo: true, duration: 190 });
+    return true;
   }
 
   private createModel() {

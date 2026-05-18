@@ -66,14 +66,38 @@ export class VisualEffectsSystem {
 
   fusionCast(comboId: string, room: Room, targets: Enemy[]) {
     const color = this.fusionColor(comboId);
-    const ring = this.scene.add.circle(room.x, room.y, 18, color, 0.18).setStrokeStyle(3, color, 0.95).setDepth(140);
-    this.scene.tweens.add({ targets: ring, scale: comboId === 'solar_orchard' ? 5.4 : 3.2, alpha: 0, duration: 620, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
-    targets.slice(0, 7).forEach((target, index) => {
+    const evolved = room.evolvedFusion;
+    const ring = this.scene.add.circle(room.x, room.y, evolved ? 24 : 18, color, evolved ? 0.28 : 0.18).setStrokeStyle(evolved ? 5 : 3, evolved ? 0xfff0bd : color, 0.95).setDepth(140);
+    this.scene.tweens.add({ targets: ring, scale: comboId === 'solar_orchard' ? evolved ? 6.8 : 5.4 : evolved ? 4.3 : 3.2, alpha: 0, duration: evolved ? 780 : 620, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
+    targets.slice(0, evolved ? 10 : 7).forEach((target, index) => {
       const beam = this.scene.add.graphics().setDepth(135);
-      beam.lineStyle(comboId === 'echo_lightning' ? 4 : 3, color, 0.85).lineBetween(room.x, room.y, target.x, target.y);
-      this.scene.tweens.add({ targets: beam, alpha: 0, duration: 220 + index * 35, onComplete: () => beam.destroy() });
+      beam.lineStyle(evolved ? 5 : comboId === 'echo_lightning' ? 4 : 3, evolved ? 0xfff0bd : color, 0.85).lineBetween(room.x, room.y, target.x, target.y);
+      this.scene.tweens.add({ targets: beam, alpha: 0, duration: (evolved ? 300 : 220) + index * 35, onComplete: () => beam.destroy() });
       this.spawnThemedBurst(comboId, target.x, target.y, color, index);
     });
+  }
+
+  fusionEvolved(room: Room) {
+    const combo = room.fusedCombo;
+    const color = combo ? this.fusionColor(combo.id) : 0xffe28a;
+    const halo = this.scene.add.star(room.x, room.y, 10, 28, 62, 0xffe28a, 0.28).setStrokeStyle(4, color, 0.95).setDepth(210);
+    const label = this.scene.add.text(room.x, room.y - 50, room.evolutionTitle(), { fontSize: '16px', color: '#fff0bd', fontStyle: 'bold' }).setOrigin(0.5).setDepth(220);
+    this.scene.tweens.add({ targets: halo, scale: 2.1, angle: 220, alpha: 0, duration: 1100, ease: 'Cubic.easeOut', onComplete: () => halo.destroy() });
+    this.scene.tweens.add({ targets: label, y: label.y - 20, alpha: 0, duration: 1400, onComplete: () => label.destroy() });
+    for (let i = 0; i < 18; i += 1) {
+      const spark = this.scene.add.star(room.x, room.y, 5, 2, 7, i % 3 === 0 ? 0xffffff : color, 0.95).setDepth(215);
+      this.scene.tweens.add({
+        targets: spark,
+        x: room.x + Phaser.Math.Between(-78, 78),
+        y: room.y + Phaser.Math.Between(-54, 54),
+        angle: Phaser.Math.Between(90, 360),
+        alpha: 0,
+        scale: 0.25,
+        duration: 760 + i * 16,
+        ease: 'Cubic.easeOut',
+        onComplete: () => spark.destroy(),
+      });
+    }
   }
 
   private spawnThemedBurst(comboId: string, x: number, y: number, color: number, offset: number) {
