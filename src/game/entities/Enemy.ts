@@ -42,7 +42,8 @@ export class Enemy extends Phaser.GameObjects.Container {
     const details = this.createModel(radius);
     this.label = scene.add.text(0, radius + 13, this.def.icon, { fontSize: this.def.boss ? '11px' : '9px', color: '#fff9e5', fontStyle: 'bold' }).setOrigin(0.5).setAlpha(0.75);
     this.bar = scene.add.rectangle(0, radius + 6, radius * 2, 4, 0x5eff9a).setOrigin(0.5);
-    this.add([this.bodyShape, details, this.label, this.bar]);
+    const resistIcons = scene.add.text(0, -radius - 22, this.resistIconText(), { fontSize: '9px', color: '#ffe29a', fontStyle: 'bold' }).setOrigin(0.5).setAlpha(this.def.boss ? 0.9 : 0.62);
+    this.add([this.bodyShape, details, this.label, this.bar, resistIcons]);
     scene.add.existing(this);
   }
 
@@ -130,6 +131,20 @@ export class Enemy extends Phaser.GameObjects.Container {
     if (this.hasStatus('frail')) return 0xd6b5ff;
     if (this.hasStatus('marked')) return 0xffe577;
     return 0xf7e3ab;
+  }
+
+  private resistIconText() {
+    const icons: string[] = [];
+    if (this.def.fireResist && this.def.fireResist < 1) icons.push('F-');
+    if (this.def.rootResist) icons.push('R-');
+    if (this.def.stormResist) icons.push('S-');
+    if (this.def.timeResist) icons.push('T-');
+    if (this.def.moonResist) icons.push('M-');
+    if (this.def.alchemyResist) icons.push('A-');
+    if (this.def.shadowWeak) icons.push('Sh+');
+    if (this.def.slowResist) icons.push('Slow-');
+    if (this.def.rewindResist) icons.push('Rw-');
+    return icons.slice(0, 3).join(' ');
   }
 
   private createModel(radius: number) {

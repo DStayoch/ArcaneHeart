@@ -28,7 +28,7 @@ export class RoomSystem {
       room.cooldownRemaining -= scaled;
       if (room.cooldownRemaining > 0) return;
       this.act(room, enemies);
-      room.cooldownRemaining = room.cooldown() * this.adjacentSpeedBoost(room, rooms);
+      room.cooldownRemaining = room.cooldown() * this.adjacentSpeedBoost(room, rooms) * this.heartPanicBoost();
     });
   }
 
@@ -178,4 +178,7 @@ export class RoomSystem {
     return boosted ? 0.9 : 1;
   }
 
+  private heartPanicBoost() {
+    return this.state.heartHp <= 5 ? 0.72 : 1;
+  }
 }

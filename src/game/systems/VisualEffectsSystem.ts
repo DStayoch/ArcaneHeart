@@ -8,12 +8,18 @@ export class VisualEffectsSystem {
 
   enemyKilled(enemy: Enemy, mana: number) {
     const color = enemy.def.color;
-    for (let i = 0; i < 12; i += 1) {
-      const shard = this.scene.add.circle(enemy.x, enemy.y, Phaser.Math.Between(2, 5), i % 3 === 0 ? 0xfff0bd : color, 0.95).setDepth(180);
+    const count = enemy.def.boss ? 28 : 12;
+    if (enemy.def.boss) {
+      const shock = this.scene.add.star(enemy.x, enemy.y, 10, 20, 58, color, 0.24).setStrokeStyle(4, 0xfff0bd, 0.9).setDepth(178);
+      this.scene.tweens.add({ targets: shock, scale: 2.4, angle: 220, alpha: 0, duration: 920, ease: 'Cubic.easeOut', onComplete: () => shock.destroy() });
+      this.scene.cameras.main.shake(180, 0.004);
+    }
+    for (let i = 0; i < count; i += 1) {
+      const shard = this.scene.add.circle(enemy.x, enemy.y, Phaser.Math.Between(2, enemy.def.boss ? 7 : 5), i % 3 === 0 ? 0xfff0bd : color, 0.95).setDepth(180);
       this.scene.tweens.add({
         targets: shard,
-        x: enemy.x + Phaser.Math.Between(-38, 38),
-        y: enemy.y + Phaser.Math.Between(-34, 34),
+        x: enemy.x + Phaser.Math.Between(enemy.def.boss ? -80 : -38, enemy.def.boss ? 80 : 38),
+        y: enemy.y + Phaser.Math.Between(enemy.def.boss ? -64 : -34, enemy.def.boss ? 64 : 34),
         alpha: 0,
         scale: 0.2,
         duration: 360,
@@ -34,6 +40,21 @@ export class VisualEffectsSystem {
         ease: 'Sine.easeIn',
         onComplete: () => wisp.destroy(),
       });
+    }
+    if (enemy.def.rewardEssence) {
+      for (let i = 0; i < enemy.def.rewardEssence; i += 1) {
+        const essence = this.scene.add.star(enemy.x, enemy.y, 6, 3, 8, 0xd8c0ff, 0.95).setDepth(186);
+        this.scene.tweens.add({
+          targets: essence,
+          x: 340 + i * 10,
+          y: 24,
+          alpha: 0,
+          angle: 180,
+          duration: 720 + i * 80,
+          ease: 'Sine.easeIn',
+          onComplete: () => essence.destroy(),
+        });
+      }
     }
   }
 

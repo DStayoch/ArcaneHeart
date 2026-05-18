@@ -13,7 +13,14 @@ export interface GameState {
   won: boolean;
   lost: boolean;
   activeCombos: ComboDefinition[];
+  unlockedComboIds: string[];
   activeMutations: MutationDefinition[];
+  roomsBuilt: number;
+  bossesDefeated: number;
+  evolvedFusions: number;
+  enemiesDefeated: number;
+  leaks: number;
+  heartPanicTriggered: boolean;
 }
 
 export const createGameState = (): GameState => ({
@@ -28,5 +35,12 @@ export const createGameState = (): GameState => ({
   won: false,
   lost: false,
   activeCombos: [],
+  unlockedComboIds: [],
   activeMutations: [],
+  roomsBuilt: 0,
+  bossesDefeated: 0,
+  evolvedFusions: 0,
+  enemiesDefeated: 0,
+  leaks: 0,
+  heartPanicTriggered: false,
 });

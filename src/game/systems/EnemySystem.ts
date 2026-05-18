@@ -31,7 +31,8 @@ export class EnemySystem {
   }
 
   update(deltaMs: number) {
-    const scaledDelta = this.state.paused ? 0 : deltaMs * this.state.speed;
+    const panicPressure = this.state.heartHp <= 5 ? 1.08 : 1;
+    const scaledDelta = this.state.paused ? 0 : deltaMs * this.state.speed * panicPressure;
     for (const enemy of [...this.enemies]) {
       enemy.updateEnemy(scaledDelta, 1);
       if (!enemy.alive) this.kill(enemy);
@@ -46,6 +47,8 @@ export class EnemySystem {
     this.economy.addMana(manaReward);
     this.economy.addEssence(enemy.def.rewardEssence ?? 0);
     this.fx?.enemyKilled(enemy, manaReward);
+    this.state.enemiesDefeated += 1;
+    if (enemy.def.boss) this.state.bossesDefeated += 1;
     this.state.enemiesRemaining = Math.max(0, this.state.enemiesRemaining - 1);
     this.scene.tweens.add({ targets: enemy, alpha: 0, scale: 1.6, duration: 200, onComplete: () => enemy.destroy() });
     this.enemies.splice(this.enemies.indexOf(enemy), 1);
@@ -59,6 +62,7 @@ export class EnemySystem {
 
   private leak(enemy: Enemy) {
     this.state.heartHp -= enemy.def.damageToHeart ?? (enemy.def.boss ? 7 : 1);
+    this.state.leaks += 1;
     this.state.enemiesRemaining = Math.max(0, this.state.enemiesRemaining - 1);
     enemy.destroy();
     this.enemies.splice(this.enemies.indexOf(enemy), 1);

@@ -17,8 +17,11 @@ import { TowerMapSystem } from '../systems/TowerMapSystem';
 import { VisualEffectsSystem } from '../systems/VisualEffectsSystem';
 import { WaveSystem } from '../systems/WaveSystem';
 import { BuildMenu } from '../ui/BuildMenu';
+import { EscapeMenu } from '../ui/EscapeMenu';
 import { Hud } from '../ui/Hud';
 import { MutationChoicePanel } from '../ui/MutationChoicePanel';
+import { PostWaveRewardPanel, type PostWaveReward } from '../ui/PostWaveRewardPanel';
+import { RangePreview } from '../ui/RangePreview';
 import { RoomInfoPanel } from '../ui/RoomInfoPanel';
 import { Tooltip } from '../ui/Tooltip';
 import { TutorialPanel } from '../ui/TutorialPanel';
@@ -40,8 +43,11 @@ export class GameScene extends Phaser.Scene {
   private hud!: Hud;
   private buildMenu!: BuildMenu;
   private tooltip!: Tooltip;
+  private escapeMenu!: EscapeMenu;
   private wavePreview!: WavePreview;
   private mutationPanel!: MutationChoicePanel;
+  private rewardPanel!: PostWaveRewardPanel;
+  private rangePreview!: RangePreview;
   private roomInfo!: RoomInfoPanel;
   private tutorial?: TutorialPanel;
   private audio!: AudioSystem;
@@ -50,6 +56,8 @@ export class GameScene extends Phaser.Scene {
   private moveRoomSelection?: Room;
   private roomInfoHideTimer?: Phaser.Time.TimerEvent;
   private roomInfoHovered = false;
+  private pendingMutationAfterReward = false;
+  private lastLeakCount = 0;
   private ready = false;
 
   constructor() {
@@ -96,30 +104,38 @@ export class GameScene extends Phaser.Scene {
     this.enemies.update(delta);
     this.rooms.update(delta, this.build.rooms, this.enemies.enemies);
     this.projectiles.update(this.state.paused ? 0 : delta * this.state.speed, this.enemies.enemies, this.state.activeCombos);
-    this.state.activeCombos = this.combos.update(this.build.rooms);
+    const activeCombos = this.combos.update(this.build.rooms);
+    this.recordUnlockedCombos(activeCombos);
+    this.state.activeCombos = activeCombos;
     if (this.waves.update()) this.completeWave();
     if (this.state.heartHp <= 0) this.endGame(false);
+    this.checkHeartPanic();
+    this.checkLeaks();
     this.refreshUi();
   }
 
   private createUi() {
     this.tooltip = new Tooltip(this);
     this.hud = new Hud(this, this.state, this.waves, this.tooltip);
+    this.escapeMenu = new EscapeMenu(this);
     this.combos = new ComboSystem(this, this.tooltip, this.fx, (anchor, contributors, combo) => {
       this.build.consumeFusion(anchor, contributors, combo, this.tower.slots);
       if (this.selectedRoom && contributors.includes(this.selectedRoom)) {
         this.selectedRoom = anchor;
       }
     });
-    this.wavePreview = new WavePreview(this, this.waves);
+    this.wavePreview = new WavePreview(this, this.waves, this.tooltip);
+    this.rangePreview = new RangePreview(this);
     this.buildMenu = new BuildMenu(this, this.state);
     this.roomInfo = new RoomInfoPanel(this);
     this.mutationPanel = new MutationChoicePanel(this);
+    this.rewardPanel = new PostWaveRewardPanel(this);
     this.buildMenu.onBuild = (slot, roomId) => {
       this.audio.unlock();
       const room = this.build.build(slot, roomId);
       if (room) this.attachRoomInput(room);
       if (room) this.audio.play('build');
+      if (room) this.state.roomsBuilt += 1;
       this.buildMenu.close();
       this.selectedRoom = room;
       this.moveRoomSelection = undefined;
@@ -142,6 +158,12 @@ export class GameScene extends Phaser.Scene {
       this.selectedRoom = undefined;
       this.hideRoomInfo();
     };
+    this.roomInfo.onFocus = (room) => {
+      room.toggleUpgradeFocus();
+      this.audio.play('build');
+      this.rangePreview.show(room);
+      this.showRoomInfo(room);
+    };
     this.roomInfo.onEvolve = (room) => {
       if (!room.canEvolve()) return;
       if (!this.economy.spendEssence(room.evolutionCost())) {
@@ -149,6 +171,7 @@ export class GameScene extends Phaser.Scene {
         return;
       }
       if (room.evolveFusion()) {
+        this.state.evolvedFusions += 1;
         this.audio.play('combo');
         this.fx.fusionEvolved(room);
         this.showRoomInfo(room);
@@ -164,6 +187,9 @@ export class GameScene extends Phaser.Scene {
       this.mutationPanel.hidePanel();
       this.state.paused = false;
     };
+    this.rewardPanel.onChoose = (reward) => this.applyPostWaveReward(reward);
+    this.escapeMenu.onResume = () => this.closeEscapeMenu();
+    this.escapeMenu.onStartScreen = () => this.scene.start('MenuScene');
   }
 
   private wireInput() {
@@ -193,12 +219,7 @@ export class GameScene extends Phaser.Scene {
       this.tutorial ??= new TutorialPanel(this);
       this.tutorial.open();
     });
-    this.input.keyboard?.on('keydown-ESC', () => {
-      this.buildMenu.close();
-      this.tooltip.hide();
-      this.tutorial?.setVisible(false);
-      this.clearRoomSelection();
-    });
+    this.input.keyboard?.on('keydown-ESC', () => this.handleEscape());
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer, targets: Phaser.GameObjects.GameObject[]) => {
       if (targets.length === 0) this.clearRoomSelection();
     });
@@ -206,6 +227,11 @@ export class GameScene extends Phaser.Scene {
 
   private openSlot(slot: BuildSlot) {
     if (this.moveRoomSelection && !this.state.waveActive && !slot.model.roomId) {
+      const moveCost = this.moveCost();
+      if (moveCost > 0 && !this.economy.spendMana(moveCost)) {
+        this.showFloatingText(slot.x, slot.y - 30, `Move costs ${moveCost} Mana`, '#ffe29a');
+        return;
+      }
       if (this.build.moveRoom(this.moveRoomSelection, slot, this.tower.slots)) {
         this.selectedRoom = this.moveRoomSelection;
         this.tooltip.hide();
@@ -240,9 +266,13 @@ export class GameScene extends Phaser.Scene {
     });
     room.on('pointerover', () => {
       if (room.mergedInto) return;
+      this.rangePreview.show(room);
       this.showRoomInfo(room);
     });
-    room.on('pointerout', () => this.scheduleRoomInfoHide());
+    room.on('pointerout', () => {
+      this.rangePreview.hide();
+      this.scheduleRoomInfoHide();
+    });
   }
 
   private clearRoomSelection() {
@@ -258,7 +288,19 @@ export class GameScene extends Phaser.Scene {
     }
     this.state.wave += 1;
     this.economy.addMana(18 + this.state.wave * 2);
-    if ((this.state.wave - 1) % 2 === 0) {
+    const shouldReward = (this.state.wave - 1) % 3 === 0;
+    this.pendingMutationAfterReward = (this.state.wave - 1) % 2 === 0;
+    if (shouldReward) {
+      this.state.paused = true;
+      this.rewardPanel.showPanel();
+      return;
+    }
+    this.showPendingMutation();
+  }
+
+  private showPendingMutation() {
+    if (this.pendingMutationAfterReward) {
+      this.pendingMutationAfterReward = false;
       this.state.paused = true;
       this.mutationPanel.showChoices(this.mutations.choices());
     }
@@ -269,12 +311,99 @@ export class GameScene extends Phaser.Scene {
     this.state.won = won;
     this.state.lost = !won;
     this.audio.play(won ? 'win' : 'loss');
-    this.scene.start('GameOverScene', { won });
+    this.scene.start('GameOverScene', {
+      won,
+      stats: {
+        wave: this.state.wave,
+        roomsBuilt: this.state.roomsBuilt,
+        bossesDefeated: this.state.bossesDefeated,
+        evolvedFusions: this.state.evolvedFusions,
+        enemiesDefeated: this.state.enemiesDefeated,
+        leaks: this.state.leaks,
+        combosDiscovered: this.state.unlockedComboIds.length,
+      },
+    });
   }
 
   private refreshUi() {
     this.hud.refresh();
     this.wavePreview.refresh();
+  }
+
+  private handleEscape() {
+    if (this.escapeMenu.isOpen()) {
+      this.closeEscapeMenu();
+      return;
+    }
+    if (this.buildMenu.visible || this.roomInfo.visible || this.tutorial?.visible || this.selectedRoom || this.moveRoomSelection) {
+      this.buildMenu.close();
+      this.tooltip.hide();
+      this.tutorial?.setVisible(false);
+      this.clearRoomSelection();
+      return;
+    }
+    if (this.mutationPanel.visible) return;
+    if (this.rewardPanel.visible) return;
+    this.openEscapeMenu();
+  }
+
+  private openEscapeMenu() {
+    this.state.paused = true;
+    this.tooltip.hide();
+    this.hideRoomInfo();
+    this.buildMenu.close();
+    this.rangePreview.hide();
+    this.escapeMenu.open(this.state.unlockedComboIds, this.build.rooms.map((room) => room.def.id));
+    this.refreshUi();
+  }
+
+  private closeEscapeMenu() {
+    this.escapeMenu.closePanel();
+    this.state.paused = false;
+    this.refreshUi();
+  }
+
+  private recordUnlockedCombos(combos: Array<{ id: string }>) {
+    combos.forEach((combo) => {
+      if (!this.state.unlockedComboIds.includes(combo.id)) this.state.unlockedComboIds.push(combo.id);
+    });
+  }
+
+  private applyPostWaveReward(reward: PostWaveReward) {
+    this.rewardPanel.hidePanel();
+    if (reward === 'mana') this.economy.addMana(80);
+    if (reward === 'essence') this.economy.addEssence(2);
+    if (reward === 'heart') this.state.heartHp = Math.min(20, this.state.heartHp + 4);
+    if (reward === 'mutation') {
+      this.pendingMutationAfterReward = false;
+      this.mutationPanel.showChoices(this.mutations.choices());
+      return;
+    }
+    if (this.pendingMutationAfterReward) {
+      this.showPendingMutation();
+      return;
+    }
+    this.state.paused = false;
+  }
+
+  private moveCost() {
+    if (this.state.wave < 4) return 0;
+    return Math.min(18, 4 + this.state.wave);
+  }
+
+  private checkHeartPanic() {
+    if (this.state.heartHp > 5 || this.state.heartPanicTriggered) return;
+    this.state.heartPanicTriggered = true;
+    this.audio.play('boss');
+    this.showFloatingText(640, 102, 'HEART PANIC: the tower fights harder', '#ff9bb9');
+    this.cameras.main.flash(360, 255, 93, 165, false);
+  }
+
+  private checkLeaks() {
+    if (this.state.leaks === this.lastLeakCount) return;
+    this.lastLeakCount = this.state.leaks;
+    this.cameras.main.shake(150, 0.006);
+    this.cameras.main.flash(140, 255, 80, 120, false);
   }
 
   private showRoomInfo(room: Room) {
