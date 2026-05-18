@@ -50,7 +50,7 @@ export class TutorialPanel extends Phaser.GameObjects.Container {
   private index = 0;
   private title: Phaser.GameObjects.Text;
   private bodyText: Phaser.GameObjects.Text;
-  private count: Phaser.GameObjects.Text;
+  private countText: Phaser.GameObjects.Text;
   private back: Phaser.GameObjects.Text;
   private next: Phaser.GameObjects.Text;
 
@@ -59,10 +59,10 @@ export class TutorialPanel extends Phaser.GameObjects.Container {
     this.add(scene.add.rectangle(0, 0, 348, 194, 0x110a18, 0.96).setOrigin(0).setStrokeStyle(2, 0xffdf8f));
     this.title = scene.add.text(18, 16, '', { fontSize: '19px', color: '#ffe39d', fontStyle: 'bold' });
     this.bodyText = scene.add.text(18, 52, '', { fontSize: '14px', color: '#fff0cf', wordWrap: { width: 310 }, lineSpacing: 4 });
-    this.count = scene.add.text(18, 156, '', { fontSize: '13px', color: '#cbb9e2' });
+    this.countText = scene.add.text(18, 156, '', { fontSize: '13px', color: '#cbb9e2' });
     this.back = this.button(188, 148, 'Back');
     this.next = this.button(260, 148, 'Next');
-    this.add([this.title, this.bodyText, this.count, this.back, this.next]);
+    this.add([this.title, this.bodyText, this.countText, this.back, this.next]);
     this.setDepth(650);
     this.back.on('pointerdown', () => this.go(-1));
     this.next.on('pointerdown', () => {
@@ -92,7 +92,7 @@ export class TutorialPanel extends Phaser.GameObjects.Container {
     this.setPosition(step.x, step.y);
     this.title.setText(step.title);
     this.bodyText.setText(step.body);
-    this.count.setText(`${this.index + 1} / ${steps.length}`);
+    this.countText.setText(`${this.index + 1} / ${steps.length}`);
     this.back.setAlpha(this.index === 0 ? 0.4 : 1);
     this.next.setText(this.index === steps.length - 1 ? 'Done' : 'Next');
   }
