@@ -39,7 +39,7 @@ export class RoomSystem {
     }
     if (room.def.id === 'cauldron_nursery') {
       if (!this.state.waveActive) return false;
-      this.economy.addMana(room.level >= 3 ? 6 : 3);
+      this.economy.addMana((room.level >= 3 ? 6 : 3) + (this.hasMutation('cauldrons_sing') ? 1 : 0));
       this.audio?.playRoom(room.def.id);
       return true;
     }
@@ -193,7 +193,7 @@ export class RoomSystem {
           enemy.rewind(evolved ? 0.045 : 0.025);
           enemy.applyStatus('chilled', evolved ? 2100 : 1200, evolved ? 0.2 : 0.12);
         });
-        if (chance(evolved ? 0.45 : 0.3)) this.economy.addMana(evolved ? 2 : 1);
+        if (chance(evolved ? 0.45 : 0.3)) this.economy.addMana((evolved ? 2 : 1) + (this.hasMutation('cauldrons_sing') ? 1 : 0));
         this.fx?.fusionCast(fusion.id, room, [target, ...victims]);
         this.audio?.play('damage');
         this.audio?.playRoom('clockwork_orrery');
@@ -240,6 +240,12 @@ export class RoomSystem {
   }
 
   private heartPanicBoost() {
-    return this.state.heartHp <= 5 ? 0.72 : 1;
+    if (this.state.heartHp <= 5) return 0.72;
+    if (this.hasMutation('heart_hums_back') && this.state.heartHp <= 10) return 0.85;
+    return 1;
+  }
+
+  private hasMutation(id: string) {
+    return this.state.activeMutations.some((mutation) => mutation.id === id);
   }
 }

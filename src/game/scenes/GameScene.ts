@@ -107,6 +107,7 @@ export class GameScene extends Phaser.Scene {
     const activeCombos = this.combos.update(this.build.rooms);
     this.recordUnlockedCombos(activeCombos);
     this.state.activeCombos = activeCombos;
+    this.applyRoomMoodBonuses();
     if (this.waves.update()) this.completeWave();
     if (this.state.heartHp <= 0) this.endGame(false);
     this.checkHeartPanic();
@@ -392,9 +393,17 @@ export class GameScene extends Phaser.Scene {
 
   private applyRoomMoodBonuses() {
     const musicalWalls = this.mutations.has('walls_learn_music');
+    const mirrorMoonlight = this.mutations.has('mirror_moonlight');
+    const crystalVeins = this.mutations.has('crystal_veins');
+    const cheaperUpgrades = this.mutations.has('library_rewrites_margins');
     this.build.rooms.forEach((room) => {
-      const boosted = musicalWalls && (room.def.id === 'moon_bell' || room.def.id === 'storm_harp');
-      room.setRangeMultiplier(boosted ? 1.1 : 1);
+      const fused = Boolean(room.fusedCombo || room.activeFusion);
+      let rangeMultiplier = 1;
+      if (musicalWalls && (room.def.id === 'moon_bell' || room.def.id === 'storm_harp')) rangeMultiplier *= 1.1;
+      if (mirrorMoonlight && fused) rangeMultiplier *= 1.1;
+      room.setRangeMultiplier(rangeMultiplier);
+      room.setDamageMultiplier(crystalVeins && fused ? 1.12 : 1);
+      room.setUpgradeCostMultiplier(cheaperUpgrades ? 0.85 : 1);
     });
   }
 

@@ -27,6 +27,12 @@ export class EnemySystem {
     const enemy = new Enemy(this.scene, enemyId, this.path, elite, healthScale, speedScale, armorScale);
     if (this.spawnedThisWave === 0 && this.mutations.has('cellar_teeth')) enemy.applyStatus('snared', 2200, 0.32);
     if (this.mutations.has('stairs_rearrange')) enemy.applyStatus('dazed', 1200, 0.08);
+    if (this.mutations.has('rafters_leak_starlight') && this.spawnedThisWave % 5 === 4) enemy.applyStatus('marked', 2600, 0.22);
+    if (this.mutations.has('doors_bite_bosses') && (enemy.def.boss || elite)) enemy.applyStatus('frail', 3600, 0.28);
+    if (this.mutations.has('storms_watch_cellar') && this.spawnedThisWave % 7 === 6) {
+      enemy.applyStatus('dazed', 1800, 0.12);
+      enemy.applyStatus('chilled', 2400, 0.18);
+    }
     this.enemies.push(enemy);
     this.spawnedThisWave += 1;
     this.state.enemiesRemaining += 1;

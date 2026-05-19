@@ -15,6 +15,8 @@ export class Room extends Phaser.GameObjects.Container {
   fusedCombo?: ComboDefinition;
   evolvedFusion = false;
   rangeMultiplier = 1;
+  damageMultiplier = 1;
+  upgradeCostMultiplier = 1;
   mergedInto?: string;
   homeX: number;
   homeY: number;
@@ -51,7 +53,7 @@ export class Room extends Phaser.GameObjects.Container {
   damage() {
     const fusionBoost = this.evolvedFusion ? 1.45 : 1;
     const focusBoost = this.upgradeFocus === 'Power' ? 1 + (this.level - 1) * 0.12 : 1;
-    return this.def.baseDamage * (this.level === 1 ? 1 : this.level === 2 ? 1.3 : 1.6) * fusionBoost * focusBoost;
+    return this.def.baseDamage * (this.level === 1 ? 1 : this.level === 2 ? 1.3 : 1.6) * fusionBoost * focusBoost * this.damageMultiplier;
   }
 
   range() {
@@ -69,6 +71,10 @@ export class Room extends Phaser.GameObjects.Container {
     this.rangeMultiplier = multiplier;
   }
 
+  setDamageMultiplier(multiplier: number) {
+    this.damageMultiplier = multiplier;
+  }
+
   cooldown() {
     const supportBoost = this.level === 3 ? 0.86 : 1;
     const focusBoost = this.upgradeFocus === 'Reach' ? 0.94 : 1;
@@ -77,7 +83,11 @@ export class Room extends Phaser.GameObjects.Container {
   }
 
   upgradeCost() {
-    return Math.round(this.def.cost * (this.level === 1 ? 0.7 : 1.2));
+    return Math.round(this.def.cost * (this.level === 1 ? 0.7 : 1.2) * this.upgradeCostMultiplier);
+  }
+
+  setUpgradeCostMultiplier(multiplier: number) {
+    this.upgradeCostMultiplier = multiplier;
   }
 
   sellValue() {
