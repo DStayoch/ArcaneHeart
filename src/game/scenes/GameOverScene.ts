@@ -8,11 +8,12 @@ export class GameOverScene extends Phaser.Scene {
 
   create(data: { won: boolean; stats?: { wave: number; roomsBuilt: number; bossesDefeated: number; evolvedFusions: number; enemiesDefeated: number; leaks: number; combosDiscovered: number } }) {
     this.add.rectangle(0, 0, 1280, 720, data.won ? 0x142216 : 0x1a0d14).setOrigin(0);
+    if (!data.won) this.drawOminousDefeatBackdrop();
     for (let i = 0; i < 80; i += 1) {
       this.add.circle(Phaser.Math.Between(0, 1280), Phaser.Math.Between(0, 720), Phaser.Math.Between(1, 3), data.won ? 0xbfffb8 : 0xff9bb9, Phaser.Math.FloatBetween(0.08, 0.38));
     }
     this.add.text(640, 150, data.won ? 'THE HEART STILL SINGS' : 'THE HEART GOES DARK', { fontSize: '46px', color: data.won ? '#bfffb8' : '#ff9bb9', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add.text(640, 218, data.won ? 'The final chapter closed with the tower awake.' : 'The monsters reached the Arcane Heart.', { fontSize: '22px', color: '#fff0cf' }).setOrigin(0.5);
+    this.add.text(640, 218, data.won ? 'The final chapter closed with the tower awake.' : 'The Arcane Heart has cracked, and the tower falls silent.', { fontSize: '22px', color: '#fff0cf' }).setOrigin(0.5);
     if (!data.won) this.drawBrokenHeart();
     if (data.stats) {
       const rows = [
@@ -31,9 +32,40 @@ export class GameOverScene extends Phaser.Scene {
     restart.on('pointerdown', () => this.scene.start('MenuScene'));
   }
 
+  private drawOminousDefeatBackdrop() {
+    const veil = this.add.graphics().setDepth(0);
+    veil.fillStyle(0x060309, 0.42).fillRect(0, 0, 1280, 720);
+    veil.fillStyle(0x2a0714, 0.42).fillEllipse(640, 100, 860, 250);
+    veil.fillStyle(0xff5da5, 0.05).fillEllipse(640, 122, 520, 168);
+    veil.lineStyle(2, 0xff9bb9, 0.08);
+    for (let i = 0; i < 7; i += 1) {
+      const y = 66 + i * 23;
+      veil.beginPath();
+      veil.moveTo(268, y);
+      veil.lineTo(512 + i * 16, y + Phaser.Math.Between(-10, 10));
+      veil.lineTo(744 - i * 13, y + Phaser.Math.Between(-12, 12));
+      veil.lineTo(1016, y + Phaser.Math.Between(-8, 8));
+      veil.strokePath();
+    }
+
+    for (let i = 0; i < 24; i += 1) {
+      const mote = this.add.circle(Phaser.Math.Between(180, 1100), Phaser.Math.Between(42, 235), Phaser.Math.FloatBetween(1, 2.6), 0xff9bb9, Phaser.Math.FloatBetween(0.1, 0.28)).setDepth(1);
+      this.tweens.add({
+        targets: mote,
+        y: mote.y + Phaser.Math.Between(12, 30),
+        alpha: 0.03,
+        duration: Phaser.Math.Between(1300, 2500),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+  }
+
   private drawBrokenHeart() {
-    const c = this.add.container(640, 88).setDepth(2);
-    const glow = this.add.ellipse(0, 4, 150, 104, 0xff5da5, 0.14).setStrokeStyle(2, 0xff9bb9, 0.28);
+    const c = this.add.container(640, 82).setDepth(2);
+    const shadow = this.add.ellipse(0, 22, 178, 96, 0x050208, 0.5);
+    const glow = this.add.ellipse(0, 4, 170, 116, 0xff5da5, 0.17).setStrokeStyle(2, 0xff9bb9, 0.3);
     const heart = this.add.graphics();
     const left = [
       new Phaser.Math.Vector2(0, 48),
@@ -55,19 +87,25 @@ export class GameOverScene extends Phaser.Scene {
       new Phaser.Math.Vector2(1, 18),
       new Phaser.Math.Vector2(9, 30),
     ];
-    heart.fillStyle(0xff5da5, 0.96);
-    heart.lineStyle(3, 0xffe29a, 0.92);
+    heart.fillStyle(0xad244e, 0.96);
+    heart.lineStyle(4, 0x461021, 0.98);
     heart.fillPoints(left, true);
     heart.strokePoints(left, true);
+    heart.fillStyle(0x7f1b3b, 0.94);
     heart.fillPoints(right, true);
     heart.strokePoints(right, true);
     const crack = this.add.graphics();
     crack.lineStyle(5, 0x120817, 1).lineBetween(0, -12, -10, 5).lineBetween(-10, 5, 5, 18).lineBetween(5, 18, -5, 36);
-    crack.lineStyle(2, 0xffe29a, 0.8).lineBetween(0, -12, -10, 5).lineBetween(-10, 5, 5, 18).lineBetween(5, 18, -5, 36);
+    crack.lineStyle(2, 0xffd38a, 0.38).lineBetween(0, -12, -10, 5).lineBetween(-10, 5, 5, 18).lineBetween(5, 18, -5, 36);
+    const dyingCore = this.add.circle(1, 16, 8, 0xffd38a, 0.42);
     const shardA = this.add.triangle(-72, 10, -18, -6, 10, 4, 0, 22, 0xff5da5, 0.6).setStrokeStyle(1, 0xffe29a, 0.5);
     const shardB = this.add.triangle(74, 20, -10, -5, 18, 0, 2, 18, 0xff5da5, 0.44).setStrokeStyle(1, 0xffe29a, 0.42);
-    c.add([glow, heart, crack, shardA, shardB]);
+    const shardC = this.add.triangle(-36, 58, -7, -4, 11, 2, 0, 17, 0xff9bb9, 0.36).setStrokeStyle(1, 0xffd38a, 0.28);
+    const shardD = this.add.triangle(44, 52, -9, -3, 13, 3, 1, 18, 0xff9bb9, 0.32).setStrokeStyle(1, 0xffd38a, 0.26);
+    c.add([shadow, glow, heart, crack, dyingCore, shardA, shardB, shardC, shardD]);
     this.tweens.add({ targets: glow, scaleX: 1.14, scaleY: 1.08, alpha: 0.05, duration: 760, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.tweens.add({ targets: [shardA, shardB], y: '+=8', alpha: 0.16, duration: 980, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: dyingCore, scale: 0.62, alpha: 0.12, duration: 720, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: [heart, crack], y: '+=2', duration: 1320, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: [shardA, shardB, shardC, shardD], y: '+=8', alpha: 0.13, duration: 980, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 }
