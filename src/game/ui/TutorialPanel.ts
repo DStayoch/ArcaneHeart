@@ -39,6 +39,12 @@ const steps: TutorialStep[] = [
     y: 72,
   },
   {
+    title: 'Pause the night watch',
+    body: 'Press ESC when no room or menu is selected to pause the game. The pause menu can resume the run, return to the start screen, show your combo codex, or close the tab.',
+    x: 730,
+    y: 102,
+  },
+  {
     title: 'Upgrade and survive',
     body: 'Hover a built room to upgrade, sell, change targeting, or spend Essence to evolve a merged room. After every two waves, choose a tower mutation. Survive wave 18 to win.',
     x: 690,
