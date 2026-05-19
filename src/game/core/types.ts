@@ -93,6 +93,7 @@ export interface ComboDefinition {
   roomIds: RoomId[];
   description: string;
   visual: string;
+  color: number;
 }
 
 export interface MutationDefinition {

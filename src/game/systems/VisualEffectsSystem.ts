@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { ComboDefinition } from '../core/types';
+import { comboDefinitions } from '../data/combos';
 import type { Enemy } from '../entities/Enemy';
 import type { Room } from '../entities/Room';
 
@@ -79,7 +80,7 @@ export class VisualEffectsSystem {
 
   fusionActivated(combo: ComboDefinition, rooms: Room[]) {
     const center = rooms.reduce((acc, room) => ({ x: acc.x + room.x / rooms.length, y: acc.y + room.y / rooms.length }), { x: 0, y: 0 });
-    const sigil = this.scene.add.star(center.x, center.y, combo.roomIds.length >= 3 ? 8 : 6, 10, 24, combo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff, 0.35).setStrokeStyle(2, 0xfff0bd, 0.95).setDepth(95);
+    const sigil = this.scene.add.star(center.x, center.y, combo.roomIds.length >= 3 ? 8 : 6, 10, 24, combo.color, 0.35).setStrokeStyle(2, 0xfff0bd, 0.95).setDepth(95);
     const label = this.scene.add.text(center.x, center.y - 38, `Fusion: ${combo.name}`, { fontSize: '15px', color: '#fff0bd', fontStyle: 'bold' }).setOrigin(0.5).setDepth(150);
     this.scene.tweens.add({ targets: sigil, scale: 2.4, angle: 180, alpha: 0, duration: 900, ease: 'Cubic.easeOut', onComplete: () => sigil.destroy() });
     this.scene.tweens.add({ targets: label, y: label.y - 18, alpha: 0, duration: 1200, onComplete: () => label.destroy() });
@@ -147,15 +148,6 @@ export class VisualEffectsSystem {
   }
 
   private fusionColor(comboId: string) {
-    const colors: Record<string, number> = {
-      lunar_brambles: 0xbdf4ff,
-      prismatic_fireflies: 0xffd36b,
-      funeral_chime: 0xdac7ff,
-      time_grown_thorns: 0x95e784,
-      echo_lightning: 0x8fe7ff,
-      spicy_stew_economy: 0xff8f45,
-      solar_orchard: 0xffaa4f,
-    };
-    return colors[comboId] ?? 0xffffff;
+    return comboDefinitions.find((combo) => combo.id === comboId)?.color ?? 0xffffff;
   }
 }

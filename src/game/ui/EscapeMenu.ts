@@ -62,18 +62,19 @@ export class EscapeMenu extends Phaser.GameObjects.Container {
     this.comboRows.forEach((row) => row.destroy());
     this.comboRows = [];
     comboDefinitions.forEach((combo, index) => {
-      const y = 214 + index * 48;
+      const x = 350 + (index % 2) * 294;
+      const y = 214 + Math.floor(index / 2) * 60;
       const known = unlocked.has(combo.id);
-      const row = this.scene.add.container(350, y);
-      const bg = this.scene.add.rectangle(0, 0, 570, 38, known ? 0x21162d : 0x100916, known ? 0.96 : 0.74).setOrigin(0).setStrokeStyle(1, known ? 0xffdf8f : 0x6e557b, known ? 0.86 : 0.55);
+      const row = this.scene.add.container(x, y);
+      const bg = this.scene.add.rectangle(0, 0, 276, 50, known ? 0x21162d : 0x100916, known ? 0.96 : 0.74).setOrigin(0).setStrokeStyle(1, known ? combo.color : 0x6e557b, known ? 0.9 : 0.55);
       const rooms = combo.roomIds.map((id) => built.has(id) || known ? roomDefinitions[id].name : '?').join(' + ');
       const name = known ? combo.name : `Locked: ${combo.name}`;
       const knownPieces = combo.roomIds.filter((id) => built.has(id)).length;
       const detail = known ? combo.description : knownPieces ? `Hint: ${rooms}` : `Find compatible rooms to reveal hints.`;
       const label = this.scene.add.text(12, 6, `${known ? 'Unlocked' : 'Unknown'} - ${name}\n${detail}`, {
-        fontSize: '12px',
+        fontSize: '11px',
         color: known ? '#fff0bd' : '#9f91ad',
-        wordWrap: { width: 540, useAdvancedWrap: true },
+        wordWrap: { width: 252, useAdvancedWrap: true },
         lineSpacing: 2,
       });
       row.add([bg, label]);

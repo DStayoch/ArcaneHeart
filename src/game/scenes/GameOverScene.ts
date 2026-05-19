@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { comboDefinitions } from '../data/combos';
 
 export class GameOverScene extends Phaser.Scene {
   constructor() {
@@ -19,7 +20,7 @@ export class GameOverScene extends Phaser.Scene {
         `Enemies defeated: ${data.stats.enemiesDefeated}`,
         `Bosses defeated: ${data.stats.bossesDefeated}`,
         `Rooms built: ${data.stats.roomsBuilt}`,
-        `Combos discovered: ${data.stats.combosDiscovered}/7`,
+        `Combos discovered: ${data.stats.combosDiscovered}/${comboDefinitions.length}`,
         `Evolved fusions: ${data.stats.evolvedFusions}`,
         `Heart breaches: ${data.stats.leaks}`,
       ];
@@ -31,48 +32,49 @@ export class GameOverScene extends Phaser.Scene {
   }
 
   private drawHeartEater() {
-    const monster = this.add.container(914, 354).setDepth(1);
-    const aura = this.add.ellipse(8, 28, 330, 240, 0xff5da5, 0.08).setStrokeStyle(2, 0xff9bb9, 0.18);
-    const body = this.add.ellipse(58, 34, 210, 150, 0x09050d, 0.96).setStrokeStyle(5, 0x7e3159, 0.86);
-    const back = this.add.ellipse(100, 68, 148, 106, 0x1a0d14, 0.9).setStrokeStyle(3, 0xff5da5, 0.34);
-    const jawTop = this.add.triangle(-18, 16, -100, -26, 38, -32, 18, 20, 0x120817, 1).setStrokeStyle(3, 0xff9bb9, 0.72);
-    const jawBottom = this.add.triangle(-18, 54, -96, 106, 42, 94, 18, 50, 0x120817, 1).setStrokeStyle(3, 0xff9bb9, 0.72);
-    const heartGlow = this.add.ellipse(-84, 42, 100, 78, 0xff5da5, 0.18);
+    const monster = this.add.container(1010, 396).setDepth(1);
+    const aura = this.add.ellipse(0, 16, 330, 210, 0xff5da5, 0.07).setStrokeStyle(2, 0xff9bb9, 0.16);
+    const body = this.add.ellipse(34, 18, 210, 132, 0x050309, 0.98).setStrokeStyle(5, 0x8d2f66, 0.82);
+    const haunch = this.add.ellipse(92, 44, 150, 92, 0x140816, 0.9).setStrokeStyle(3, 0xff5da5, 0.26);
+    const mouthShadow = this.add.ellipse(-64, 24, 112, 74, 0x000000, 0.82);
+    const upperJaw = this.add.polygon(-58, -18, [[-96, 26], [-62, -34], [28, -20], [8, 8], [-52, 12]], 0x120817, 1).setStrokeStyle(3, 0xff9bb9, 0.76);
+    const lowerJaw = this.add.polygon(-58, 68, [[-96, -22], [-50, 28], [30, 14], [8, -8], [-52, -12]], 0x120817, 1).setStrokeStyle(3, 0xff9bb9, 0.76);
+    const tongue = this.add.ellipse(-48, 38, 84, 26, 0x8d2f66, 0.64).setRotation(-0.18);
+    const heartGlow = this.add.ellipse(-112, 34, 94, 78, 0xff5da5, 0.2);
     const heart = this.add.graphics();
+    const heartPoints = [
+      new Phaser.Math.Vector2(-112, 68),
+      new Phaser.Math.Vector2(-150, 32),
+      new Phaser.Math.Vector2(-138, 2),
+      new Phaser.Math.Vector2(-120, 9),
+      new Phaser.Math.Vector2(-112, 23),
+      new Phaser.Math.Vector2(-104, 9),
+      new Phaser.Math.Vector2(-86, 2),
+      new Phaser.Math.Vector2(-74, 32),
+    ];
     heart.fillStyle(0xff5da5, 0.96);
     heart.lineStyle(3, 0xffe29a, 0.92);
-    heart.fillPoints([
-      new Phaser.Math.Vector2(-84, 72),
-      new Phaser.Math.Vector2(-124, 34),
-      new Phaser.Math.Vector2(-111, 1),
-      new Phaser.Math.Vector2(-91, 9),
-      new Phaser.Math.Vector2(-84, 22),
-      new Phaser.Math.Vector2(-77, 9),
-      new Phaser.Math.Vector2(-57, 1),
-      new Phaser.Math.Vector2(-44, 34),
-    ], true);
-    heart.strokePoints([
-      new Phaser.Math.Vector2(-84, 72),
-      new Phaser.Math.Vector2(-124, 34),
-      new Phaser.Math.Vector2(-111, 1),
-      new Phaser.Math.Vector2(-91, 9),
-      new Phaser.Math.Vector2(-84, 22),
-      new Phaser.Math.Vector2(-77, 9),
-      new Phaser.Math.Vector2(-57, 1),
-      new Phaser.Math.Vector2(-44, 34),
-    ], true);
-    const eyeA = this.add.circle(34, -8, 9, 0xffe29a, 0.96);
-    const eyeB = this.add.circle(94, 8, 7, 0xffe29a, 0.82);
-    const pupilA = this.add.circle(36, -8, 3, 0x120817, 1);
-    const pupilB = this.add.circle(96, 8, 2.5, 0x120817, 1);
-    monster.add([aura, back, body, jawTop, jawBottom, heartGlow, heart, eyeA, eyeB, pupilA, pupilB]);
-    for (let i = 0; i < 9; i += 1) {
-      const toothTop = this.add.triangle(-72 + i * 15, -17 + (i % 2) * 5, -7, 0, 0, 22, 7, 0, 0xfff0bd, 0.95);
-      const toothBottom = this.add.triangle(-72 + i * 15, 84 - (i % 2) * 4, -7, 0, 0, -22, 7, 0, 0xfff0bd, 0.95);
+    heart.fillPoints(heartPoints, true);
+    heart.strokePoints(heartPoints, true);
+    const eyeA = this.add.ellipse(24, -20, 18, 12, 0xffe29a, 0.96).setRotation(-0.2);
+    const eyeB = this.add.ellipse(80, -6, 14, 10, 0xffe29a, 0.78).setRotation(0.24);
+    const pupilA = this.add.circle(27, -20, 3, 0x120817, 1);
+    const pupilB = this.add.circle(82, -6, 2.4, 0x120817, 1);
+    const browA = this.add.rectangle(24, -33, 35, 4, 0xff9bb9, 0.46).setRotation(-0.34);
+    const browB = this.add.rectangle(78, -18, 26, 3, 0xff9bb9, 0.34).setRotation(0.28);
+    const tendrilA = this.add.graphics();
+    tendrilA.lineStyle(5, 0x7e3159, 0.58).lineBetween(96, 6, 136, -24).lineBetween(136, -24, 184, -28).lineBetween(184, -28, 218, 2).lineBetween(218, 2, 226, 36).lineBetween(226, 36, 198, 66);
+    const tendrilB = this.add.graphics();
+    tendrilB.lineStyle(4, 0x8d2f66, 0.44).lineBetween(72, 72, 118, 104).lineBetween(118, 104, 168, 116).lineBetween(168, 116, 218, 90);
+    monster.add([aura, tendrilA, tendrilB, haunch, body, mouthShadow, tongue, upperJaw, lowerJaw, heartGlow, heart, eyeA, eyeB, pupilA, pupilB, browA, browB]);
+    for (let i = 0; i < 8; i += 1) {
+      const toothTop = this.add.triangle(-108 + i * 16, 5 + (i % 2) * 2, -5, 0, 0, 18, 5, 0, 0xfff0bd, 0.96);
+      const toothBottom = this.add.triangle(-108 + i * 16, 58 - (i % 2) * 2, -5, 0, 0, -18, 5, 0, 0xfff0bd, 0.96);
       monster.add([toothTop, toothBottom]);
     }
-    this.tweens.add({ targets: heartGlow, scaleX: 1.2, scaleY: 1.16, alpha: 0.05, duration: 620, yoyo: true, repeat: -1 });
-    this.tweens.add({ targets: [jawTop, jawBottom], x: -8, duration: 760, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.tweens.add({ targets: monster, y: 344, duration: 1800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: [heartGlow, heart], scaleX: 1.1, scaleY: 1.08, duration: 620, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: [upperJaw, lowerJaw], x: -8, duration: 840, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: [eyeA, pupilA], alpha: 0.55, duration: 520, yoyo: true, repeat: -1, repeatDelay: 1300 });
+    this.tweens.add({ targets: monster, y: 386, duration: 1900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 }

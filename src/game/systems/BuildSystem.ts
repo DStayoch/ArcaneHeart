@@ -56,7 +56,7 @@ export class BuildSystem {
     room.floor = targetSlot.model.floor;
     room.homeX = targetSlot.x;
     room.homeY = targetSlot.y;
-    if (room.fusedCombo) room.setFusionRole(room.fusedCombo, 'anchor', room.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff, targetSlot.x, targetSlot.y);
+    if (room.fusedCombo) room.setFusionRole(room.fusedCombo, 'anchor', room.fusedCombo.color, targetSlot.x, targetSlot.y);
     this.scene.tweens.add({ targets: room, x: targetSlot.x, y: targetSlot.y, duration: 170, ease: 'Sine.easeOut' });
     this.ping(targetSlot.x, targetSlot.y, room.def.color);
     return true;
@@ -73,8 +73,8 @@ export class BuildSystem {
       if (index >= 0) this.rooms.splice(index, 1);
       room.destroy();
     });
-    anchor.becomeFusedChild(combo, combo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff);
-    this.ping(anchor.homeX, anchor.homeY, combo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff);
+    anchor.becomeFusedChild(combo, combo.color);
+    this.ping(anchor.homeX, anchor.homeY, combo.color);
   }
 
   private ping(x: number, y: number, color: number) {

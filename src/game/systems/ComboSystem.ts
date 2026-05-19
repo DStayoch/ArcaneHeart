@@ -28,7 +28,7 @@ export class ComboSystem {
     rooms.forEach((room) => room.setFusionRole(undefined, 'none'));
     rooms.filter((room) => room.fusedCombo).forEach((room) => {
       if (!room.fusedCombo) return;
-      const color = room.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff;
+      const color = room.fusedCombo.color;
       active.push(room.fusedCombo);
       used.add(room);
       room.setFusionRole(room.fusedCombo, 'anchor', color, room.homeX, room.homeY);
@@ -39,7 +39,7 @@ export class ComboSystem {
       const fusionRooms = this.findFusionRooms(combo, rooms.filter((room) => !used.has(room) && !room.fusedCombo));
       if (fusionRooms) {
         active.push(combo);
-        const color = combo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff;
+        const color = combo.color;
         fusionRooms.forEach((room) => used.add(room));
         const [anchor, ...contributors] = fusionRooms;
         anchor.becomeFusedChild(combo, color);

@@ -131,9 +131,9 @@ export class Room extends Phaser.GameObjects.Container {
       this.text.setText('Merged');
       this.bg.setFillStyle(color, 0.32).setStrokeStyle(2, color, 0.9);
       this.disableRoomInput();
-    } else {
+      } else {
       if (this.fusedCombo) {
-        this.setFusionRole(this.fusedCombo, 'anchor', this.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff, this.homeX, this.homeY);
+        this.setFusionRole(this.fusedCombo, 'anchor', this.fusedCombo.color, this.homeX, this.homeY);
         return;
       }
       this.setAlpha(1);
@@ -166,6 +166,10 @@ export class Room extends Phaser.GameObjects.Container {
       time_grown_thorns: 'Chronovine Engine',
       echo_lightning: 'Thunder Mirror Choir',
       spicy_stew_economy: 'Volcanic Nursery',
+      glass_mourning: 'Mourning Kaleidoscope',
+      thunder_vespers: 'Stormbell Choir',
+      bramble_conductor: 'Thunderroot Conductor',
+      clockwork_brew: 'Hourglass Cauldron',
       solar_orchard: 'Sunheart Orchard',
     };
     return titles[this.fusedCombo.id] ?? `Greater ${this.fusedCombo.name}`;
@@ -178,7 +182,7 @@ export class Room extends Phaser.GameObjects.Container {
   evolveFusion() {
     if (!this.fusedCombo || this.evolvedFusion) return false;
     this.evolvedFusion = true;
-    const color = this.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff;
+    const color = this.fusedCombo.color;
     this.setFusionRole(this.fusedCombo, 'anchor', color, this.homeX, this.homeY);
     this.upgradeGlow.setFillStyle(0xffe28a, 0.42).setAlpha(0.5);
     this.model.setScale(Math.max(this.model.scaleX, 1.18));
