@@ -30,8 +30,8 @@ export class BuildMenu extends Phaser.GameObjects.Container {
       const affordable = () => this.gameState.mana >= room.cost;
       const bg = scene.add.rectangle(0, 0, 274, 46, room.color, 0.8).setOrigin(0).setStrokeStyle(1, 0xffe6a6, 0.7);
       const text = scene.add.text(10, 6, `${room.icon} ${room.name} - ${room.cost} Mana\n${tagsText(room.tags)}`, { fontSize: '12px', color: '#140d19' });
-      const hit = scene.add.zone(0, 0, 274, 46).setOrigin(0).setInteractive({ useHandCursor: true });
-      card.add([bg, text, hit]);
+      const hit = scene.add.zone(14, y, 274, 46).setOrigin(0).setInteractive({ useHandCursor: true });
+      card.add([bg, text]);
       hit.on('pointerdown', () => {
         if (this.activeSlot && affordable()) this.onBuild?.(this.activeSlot, room.id);
       });
@@ -44,7 +44,7 @@ export class BuildMenu extends Phaser.GameObjects.Container {
         this.onOut?.();
       });
       this.cards.push({ card, bg, text, hit, cost: room.cost });
-      this.add(card);
+      this.add([card, hit]);
     });
     this.setDepth(200).setVisible(false);
     scene.add.existing(this);

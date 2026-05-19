@@ -33,13 +33,13 @@ export class WavePreview extends Phaser.GameObjects.Container {
       const row = this.scene.add.container(0, y);
       const bg = this.scene.add.rectangle(0, 0, 292, 21, def.boss ? 0x3a1730 : 0x21162d, 0.8).setOrigin(0).setStrokeStyle(1, def.boss ? 0xff9bb9 : 0x6e557b, 0.72);
       const text = this.scene.add.text(8, 4, `${entry.count}x ${def.name}${entry.elite ? ' elite' : ''}`, { fontSize: '12px', color: def.boss ? '#ffd1df' : '#fff0bd' });
-      row.add([bg, text]);
-      row.setSize(292, 21).setInteractive(new Phaser.Geom.Rectangle(0, 0, 292, 21), Phaser.Geom.Rectangle.Contains);
-      row.on('pointerover', () => {
+      const hit = this.scene.add.zone(0, 0, 292, 21).setOrigin(0).setInteractive({ useHandCursor: true });
+      row.add([bg, text, hit]);
+      hit.on('pointerover', () => {
         bg.setStrokeStyle(2, 0xffdf8f, 1);
         this.tooltip?.show(914, 242 + index * 25, this.enemyCopy(def));
       });
-      row.on('pointerout', () => {
+      hit.on('pointerout', () => {
         bg.setStrokeStyle(1, def.boss ? 0xff9bb9 : 0x6e557b, 0.72);
         this.tooltip?.hide();
       });

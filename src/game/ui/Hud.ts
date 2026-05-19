@@ -74,14 +74,14 @@ export class Hud extends Phaser.GameObjects.Container {
       const row = this.scene.add.container(930, 112 + index * 26);
       const bg = this.scene.add.rectangle(0, 0, 292, 22, 0x21162d, 0.92).setOrigin(0).setStrokeStyle(1, 0xe7c982, 0.62);
       const label = this.scene.add.text(8, 4, `* ${combo.name}`, { fontSize: '13px', color: '#fff0bd', wordWrap: { width: 274, useAdvancedWrap: true } });
-      row.add([bg, label]);
-      row.setSize(292, 22).setInteractive(new Phaser.Geom.Rectangle(0, 0, 292, 22), Phaser.Geom.Rectangle.Contains);
+      const hit = this.scene.add.zone(0, 0, 292, 22).setOrigin(0).setInteractive({ useHandCursor: true });
+      row.add([bg, label, hit]);
       const roomNames = combo.roomIds.map((id) => roomDefinitions[id].name).join(' + ');
-      row.on('pointerover', () => {
+      hit.on('pointerover', () => {
         bg.setStrokeStyle(2, 0xffe28a, 1);
         this.tooltip?.show(925, 118 + index * 26, `${combo.name}\nRooms: ${roomNames}\nEffect: ${combo.description}\nVisual: ${combo.visual}`);
       });
-      row.on('pointerout', () => {
+      hit.on('pointerout', () => {
         bg.setStrokeStyle(1, 0xe7c982, 0.62);
         this.tooltip?.hide();
       });

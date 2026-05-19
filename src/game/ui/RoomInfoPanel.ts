@@ -19,6 +19,7 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
   constructor(scene: Phaser.Scene) {
     super(scene, 918, 360);
     const panel = scene.add.rectangle(0, 0, 330, 246, 0x120b19, 0.93).setOrigin(0).setStrokeStyle(2, 0x8d6ea7);
+    const hoverZone = scene.add.zone(0, 0, 330, 246).setOrigin(0).setInteractive();
     this.copy = scene.add.text(14, 14, 'Select a room for upgrades.', { fontSize: '13px', color: '#fff0cf', wordWrap: { width: 300 }, lineSpacing: 3 });
     const upgrade = this.button(14, 166, 'Upgrade');
     const sell = this.button(118, 166, 'Sell');
@@ -35,12 +36,11 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
       this.room.priority = priorities[(idx + 1) % priorities.length];
       this.refresh(this.room);
     });
-    this.add([panel, this.copy, upgrade, sell, target, focus, this.evolveButton]);
+    hoverZone.on('pointerover', () => this.onHoverChange?.(true));
+    hoverZone.on('pointerout', () => this.onHoverChange?.(false));
+    this.add([panel, hoverZone, this.copy, upgrade, sell, target, focus, this.evolveButton]);
     this.setDepth(220);
     this.setSize(330, 246);
-    this.setInteractive(new Phaser.Geom.Rectangle(0, 0, 330, 246), Phaser.Geom.Rectangle.Contains);
-    this.on('pointerover', () => this.onHoverChange?.(true));
-    this.on('pointerout', () => this.onHoverChange?.(false));
     this.setVisible(false);
     scene.add.existing(this);
   }
@@ -64,6 +64,9 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
   }
 
   private button(x: number, y: number, label: string) {
-    return this.scene.add.text(x, y, label, { fontSize: '13px', color: '#130d18', backgroundColor: '#f0cf83', padding: { x: 8, y: 6 } }).setInteractive({ useHandCursor: true });
+    const text = this.scene.add.text(x, y, label, { fontSize: '13px', color: '#130d18', backgroundColor: '#f0cf83', padding: { x: 8, y: 6 } }).setInteractive({ useHandCursor: true });
+    text.on('pointerover', () => this.onHoverChange?.(true));
+    text.on('pointerout', () => this.onHoverChange?.(false));
+    return text;
   }
 }

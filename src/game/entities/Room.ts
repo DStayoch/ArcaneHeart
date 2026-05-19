@@ -20,6 +20,7 @@ export class Room extends Phaser.GameObjects.Container {
   private bg: Phaser.GameObjects.Rectangle;
   private text: Phaser.GameObjects.Text;
   private model: Phaser.GameObjects.Container;
+  private hitZone: Phaser.GameObjects.Zone;
   private upgradeGlow: Phaser.GameObjects.Ellipse;
   private fusionGlow?: Phaser.GameObjects.Ellipse;
   private evolutionCrown?: Phaser.GameObjects.Star;
@@ -36,7 +37,11 @@ export class Room extends Phaser.GameObjects.Container {
     this.upgradeGlow = scene.add.ellipse(0, 0, 104, 48, this.def.color, 0).setDepth(-1);
     this.model = this.createModel();
     this.text = scene.add.text(34, 10, `Lv ${this.level}`, { fontSize: '10px', color: '#130d18', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add([this.upgradeGlow, this.bg, this.model, this.text]);
+    this.hitZone = scene.add.zone(0, 0, 92, 38).setOrigin(0.5);
+    this.hitZone.on('pointerdown', () => this.emit('pointerdown'));
+    this.hitZone.on('pointerover', () => this.emit('pointerover'));
+    this.hitZone.on('pointerout', () => this.emit('pointerout'));
+    this.add([this.upgradeGlow, this.bg, this.model, this.text, this.hitZone]);
     this.setSize(92, 38);
     this.enableRoomInput();
     scene.add.existing(this);
@@ -113,7 +118,7 @@ export class Room extends Phaser.GameObjects.Container {
       this.setScale(0.1);
       this.text.setText('Merged');
       this.bg.setFillStyle(color, 0.32).setStrokeStyle(2, color, 0.9);
-      this.disableInteractive();
+      this.disableRoomInput();
     } else {
       if (this.fusedCombo) {
         this.setFusionRole(this.fusedCombo, 'anchor', this.fusedCombo.roomIds.length >= 3 ? 0xffaa4f : 0xbdf4ff, this.homeX, this.homeY);
@@ -299,8 +304,11 @@ export class Room extends Phaser.GameObjects.Container {
   }
 
   private enableRoomInput() {
-    this.setInteractive(new Phaser.Geom.Rectangle(-46, -19, 92, 38), Phaser.Geom.Rectangle.Contains);
-    this.input!.cursor = 'pointer';
+    this.hitZone.setInteractive({ useHandCursor: true });
+  }
+
+  private disableRoomInput() {
+    this.hitZone.disableInteractive();
   }
 
   private pulse(target: Phaser.GameObjects.GameObject, scale: number, duration: number) {

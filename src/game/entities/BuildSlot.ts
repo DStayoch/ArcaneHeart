@@ -5,16 +5,19 @@ export class BuildSlot extends Phaser.GameObjects.Container {
   readonly model: BuildSlotModel;
   private bg: Phaser.GameObjects.Rectangle;
   private label: Phaser.GameObjects.Text;
+  private hitZone: Phaser.GameObjects.Zone;
 
   constructor(scene: Phaser.Scene, model: BuildSlotModel) {
     super(scene, model.x, model.y);
     this.model = model;
     this.bg = scene.add.rectangle(0, 0, 92, 38, 0x21162d, 0.82).setStrokeStyle(2, 0x8267a6, 0.7);
     this.label = scene.add.text(0, 0, '+', { fontSize: '22px', color: '#eadcff' }).setOrigin(0.5);
-    this.add([this.bg, this.label]);
+    this.hitZone = scene.add.zone(0, 0, 92, 38).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.hitZone.on('pointerdown', () => this.emit('pointerdown'));
+    this.hitZone.on('pointerover', () => this.emit('pointerover'));
+    this.hitZone.on('pointerout', () => this.emit('pointerout'));
+    this.add([this.bg, this.label, this.hitZone]);
     this.setSize(92, 38);
-    this.setInteractive(new Phaser.Geom.Rectangle(-46, -19, 92, 38), Phaser.Geom.Rectangle.Contains);
-    this.input!.cursor = 'pointer';
     scene.add.existing(this);
   }
 

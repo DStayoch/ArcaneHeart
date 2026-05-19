@@ -7,12 +7,13 @@ import { GameScene } from './game/scenes/GameScene';
 import { UIScene } from './game/scenes/UIScene';
 import { GameOverScene } from './game/scenes/GameOverScene';
 
+const renderZoom = Math.min(window.devicePixelRatio || 1, 2);
+
 new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
-  resolution: Math.min(window.devicePixelRatio || 1, 2),
   backgroundColor: '#100a18',
   render: {
     antialias: true,
@@ -22,6 +23,8 @@ new Phaser.Game({
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+    autoRound: true,
+    zoom: renderZoom,
   },
   scene: [BootScene, MenuScene, GameScene, UIScene, GameOverScene],
 });
