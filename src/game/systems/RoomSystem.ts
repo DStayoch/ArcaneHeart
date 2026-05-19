@@ -104,7 +104,7 @@ export class RoomSystem {
         return;
       }
       case 'funeral_chime': {
-        const victims = this.targeting.nearbyEnemies(room, enemies, room.range() + (evolved ? 85 : 35));
+        const victims = this.targeting.nearbyEnemies(room, enemies, room.range() + 35);
         victims.forEach((enemy) => {
           enemy.applyDamage(room.damage() * (evolved ? 1.08 : 0.85) + (evolved ? 14 : 5), ['Shadow', 'Moon'], room.id);
           enemy.applyStatus('snared', evolved ? 2500 : 1700, evolved ? 0.34 : 0.26);
@@ -155,7 +155,7 @@ export class RoomSystem {
         return;
       }
       case 'solar_orchard': {
-        const victims = this.targeting.nearbyEnemies(room, enemies, room.range() + (evolved ? 130 : 70)).sort((a, b) => b.progress - a.progress).slice(0, evolved ? 11 : 7);
+        const victims = this.targeting.nearbyEnemies(room, enemies, room.range() + 70).sort((a, b) => b.progress - a.progress).slice(0, evolved ? 11 : 7);
         if (!victims.length) return;
         victims.forEach((enemy) => {
           enemy.applyDamage(room.damage() * (evolved ? 1.62 : 1.25) + (evolved ? 28 : 14), ['Fire', 'Root', 'Moon'], room.id);

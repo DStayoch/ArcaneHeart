@@ -27,7 +27,7 @@ export class VisualEffectsSystem {
         onComplete: () => shard.destroy(),
       });
     }
-    const text = this.scene.add.text(enemy.x, enemy.y - 22, `+${mana}`, { fontSize: '14px', color: '#77f0c2', fontStyle: 'bold' }).setOrigin(0.5).setDepth(190);
+    const text = this.scene.add.text(enemy.x, enemy.y - 22, `+${Math.round(mana)}`, { fontSize: '14px', color: '#77f0c2', fontStyle: 'bold' }).setOrigin(0.5).setDepth(190);
     this.scene.tweens.add({ targets: text, y: text.y - 28, alpha: 0, duration: 650, onComplete: () => text.destroy() });
     for (let i = 0; i < 4; i += 1) {
       const wisp = this.scene.add.circle(enemy.x, enemy.y, 4, 0x77f0c2, 0.9).setDepth(185);

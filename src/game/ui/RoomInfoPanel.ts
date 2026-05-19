@@ -23,13 +23,13 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
     const panel = scene.add.rectangle(0, 0, 330, 246, 0x120b19, 0.93).setOrigin(0).setStrokeStyle(2, 0x8d6ea7);
     const hoverZone = scene.add.zone(0, 0, 330, 246).setOrigin(0).setInteractive();
     this.copy = scene.add.text(14, 14, 'Select a room for upgrades.', { fontSize: '12px', color: '#fff0cf', wordWrap: { width: 300 }, lineSpacing: 2 });
-    this.economyText = scene.add.text(14, 150, '', { fontSize: '12px', color: '#ffe29a' });
-    this.targetText = scene.add.text(176, 150, '', { fontSize: '12px', color: '#bdf4ff' });
-    const upgrade = this.button(14, 170, 'Upgrade');
-    const sell = this.button(118, 170, 'Sell');
-    const target = this.button(200, 170, 'Target');
-    const focus = this.button(250, 170, 'Focus');
-    this.evolveButton = this.button(14, 208, 'Evolve Fusion');
+    this.economyText = scene.add.text(14, 144, '', { fontSize: '12px', color: '#ffe29a' });
+    this.targetText = scene.add.text(14, 160, '', { fontSize: '12px', color: '#bdf4ff' });
+    const upgrade = this.button(14, 180, 'Upgrade');
+    const sell = this.button(98, 180, 'Sell');
+    const target = this.button(154, 180, 'Target');
+    const focus = this.button(224, 180, 'Focus');
+    this.evolveButton = this.button(14, 214, 'Evolve Fusion');
     upgrade.on('pointerdown', () => this.room && this.onUpgrade?.(this.room));
     sell.on('pointerdown', () => this.room && this.onSell?.(this.room));
     focus.on('pointerdown', () => this.room && this.onFocus?.(this.room));
@@ -59,7 +59,7 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
       this.targetText.setText('');
       return;
     }
-    const signature = `${room.id}:${room.level}:${room.priority}:${room.upgradeFocus}:${room.activeFusion?.id ?? ''}:${room.mergedInto ?? ''}:${room.evolvedFusion}`;
+    const signature = `${room.id}:${room.level}:${room.priority}:${room.upgradeFocus}:${Math.round(room.previewRange())}:${room.activeFusion?.id ?? ''}:${room.mergedInto ?? ''}:${room.evolvedFusion}`;
     if (signature === this.signature) return;
     this.signature = signature;
     const fusionText = room.fusedCombo

@@ -14,6 +14,7 @@ export class Room extends Phaser.GameObjects.Container {
   activeFusion?: ComboDefinition;
   fusedCombo?: ComboDefinition;
   evolvedFusion = false;
+  rangeMultiplier = 1;
   mergedInto?: string;
   homeX: number;
   homeY: number;
@@ -55,13 +56,17 @@ export class Room extends Phaser.GameObjects.Container {
 
   range() {
     const focusBoost = this.upgradeFocus === 'Reach' ? 1 + (this.level - 1) * 0.1 : 1;
-    return this.def.range * (this.def.tags.includes('Storm') || this.def.tags.includes('Moon') ? 1.03 : 1) * focusBoost;
+    return this.def.range * focusBoost * this.rangeMultiplier;
   }
 
   previewRange() {
-    if (this.activeFusion?.id === 'solar_orchard') return this.range() + (this.evolvedFusion ? 130 : 70);
-    if (this.activeFusion?.id === 'funeral_chime') return this.range() + (this.evolvedFusion ? 85 : 35);
+    if (this.activeFusion?.id === 'solar_orchard') return this.range() + 70;
+    if (this.activeFusion?.id === 'funeral_chime') return this.range() + 35;
     return this.range();
+  }
+
+  setRangeMultiplier(multiplier: number) {
+    this.rangeMultiplier = multiplier;
   }
 
   cooldown() {

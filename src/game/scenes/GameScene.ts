@@ -136,6 +136,7 @@ export class GameScene extends Phaser.Scene {
       if (room) this.attachRoomInput(room);
       if (room) this.audio.play('build');
       if (room) this.state.roomsBuilt += 1;
+      this.applyRoomMoodBonuses();
       this.buildMenu.close();
       this.selectedRoom = room;
       this.moveRoomSelection = undefined;
@@ -184,6 +185,7 @@ export class GameScene extends Phaser.Scene {
     };
     this.mutationPanel.onChoose = (mutation) => {
       this.mutations.apply(mutation);
+      this.applyRoomMoodBonuses();
       this.mutationPanel.hidePanel();
       this.state.paused = false;
     };
@@ -388,6 +390,14 @@ export class GameScene extends Phaser.Scene {
     this.state.paused = false;
   }
 
+  private applyRoomMoodBonuses() {
+    const musicalWalls = this.mutations.has('walls_learn_music');
+    this.build.rooms.forEach((room) => {
+      const boosted = musicalWalls && (room.def.id === 'moon_bell' || room.def.id === 'storm_harp');
+      room.setRangeMultiplier(boosted ? 1.1 : 1);
+    });
+  }
+
   private moveCost() {
     if (this.state.wave < 4) return 0;
     return Math.min(18, 4 + this.state.wave);
@@ -443,6 +453,8 @@ export class GameScene extends Phaser.Scene {
     moon.add(this.add.circle(18, -8, 51, 0x180d22, 0.86));
     moon.add(this.add.circle(-10, 6, 86, 0xffe1a1, 0.06));
     this.tweens.add({ targets: moon, y: 124, duration: 2600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.drawPassingClouds();
+    this.scheduleLightning();
 
     const leftThreat = this.add.container(136, 515).setAlpha(0.2);
     leftThreat.add(this.add.ellipse(0, 0, 104, 58, 0xd95f9d, 0.32).setStrokeStyle(2, 0xffc4db, 0.3));
@@ -467,5 +479,57 @@ export class GameScene extends Phaser.Scene {
       const mote = this.add.star(Phaser.Math.Between(80, 1200), Phaser.Math.Between(170, 690), 5, 2, 5, i % 2 ? 0xbdf4ff : 0xffdf8f, 0.24);
       this.tweens.add({ targets: mote, x: mote.x + Phaser.Math.Between(-18, 18), y: mote.y - Phaser.Math.Between(28, 72), angle: 180, alpha: 0.06, duration: Phaser.Math.Between(2200, 4200), yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
+  }
+
+  private drawPassingClouds() {
+    for (let i = 0; i < 5; i += 1) {
+      const cloud = this.add.container(-180 + i * 310, 96 + (i % 3) * 56).setAlpha(0.12 + i * 0.015).setDepth(3);
+      const tint = i % 2 ? 0xd8c7f2 : 0xbdf4ff;
+      cloud.add(this.add.ellipse(0, 16, 160, 42, tint, 0.34));
+      cloud.add(this.add.ellipse(48, 8, 118, 34, tint, 0.28));
+      cloud.add(this.add.ellipse(-58, 10, 104, 32, tint, 0.22));
+      cloud.add(this.add.rectangle(6, 24, 190, 18, tint, 0.16));
+      this.tweens.add({
+        targets: cloud,
+        x: 1460,
+        duration: 42000 + i * 5200,
+        repeat: -1,
+        delay: i * 1900,
+        onRepeat: () => {
+          cloud.x = -220;
+          cloud.y = Phaser.Math.Between(82, 244);
+        },
+      });
+    }
+  }
+
+  private scheduleLightning() {
+    this.time.delayedCall(Phaser.Math.Between(5200, 11800), () => {
+      this.flashLightning();
+      this.scheduleLightning();
+    });
+  }
+
+  private flashLightning() {
+    const x = Phaser.Math.Between(70, 1210);
+    const top = Phaser.Math.Between(58, 150);
+    const bolt = this.add.graphics().setDepth(6);
+    bolt.lineStyle(4, 0xf7f2ff, 0.76);
+    bolt.beginPath();
+    bolt.moveTo(x, top);
+    let px = x;
+    let py = top;
+    for (let i = 0; i < 5; i += 1) {
+      px += Phaser.Math.Between(-42, 42);
+      py += Phaser.Math.Between(24, 54);
+      bolt.lineTo(px, py);
+    }
+    bolt.strokePath();
+    bolt.lineStyle(2, 0xbdf4ff, 0.58).lineBetween(px - 34, py - 28, px + 18, py + 16);
+    const flash = this.add.rectangle(0, 0, 1280, 720, 0xded8ff, 0.08).setOrigin(0).setDepth(5);
+    this.tweens.add({ targets: [bolt, flash], alpha: 0, duration: 180, onComplete: () => {
+      bolt.destroy();
+      flash.destroy();
+    } });
   }
 }
