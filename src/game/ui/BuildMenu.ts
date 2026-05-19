@@ -30,7 +30,11 @@ export class BuildMenu extends Phaser.GameObjects.Container {
       const bg = scene.add.rectangle(0, 0, 274, 46, room.color, 0.8).setOrigin(0).setStrokeStyle(1, 0xffe6a6, 0.7);
       const text = scene.add.text(10, 6, `${room.icon} ${room.name} - ${room.cost} Mana\n${tagsText(room.tags)}`, { fontSize: '12px', color: '#140d19' });
       card.add([bg, text]);
-      card.setSize(274, 46).setInteractive({ useHandCursor: true });
+      card.setSize(274, 46).setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(0, 0, 274, 46),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+        useHandCursor: true,
+      });
       card.on('pointerdown', () => {
         if (this.activeSlot && affordable()) this.onBuild?.(this.activeSlot, room.id);
       });

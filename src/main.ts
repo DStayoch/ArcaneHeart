@@ -12,7 +12,13 @@ new Phaser.Game({
   parent: 'game',
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
+  resolution: Math.min(window.devicePixelRatio || 1, 2),
   backgroundColor: '#100a18',
+  render: {
+    antialias: true,
+    pixelArt: false,
+    roundPixels: false,
+  },
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,

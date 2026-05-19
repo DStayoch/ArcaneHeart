@@ -38,7 +38,7 @@ export class Room extends Phaser.GameObjects.Container {
     this.text = scene.add.text(34, 10, `Lv ${this.level}`, { fontSize: '10px', color: '#130d18', fontStyle: 'bold' }).setOrigin(0.5);
     this.add([this.upgradeGlow, this.bg, this.model, this.text]);
     this.setSize(92, 38);
-    this.setInteractive({ useHandCursor: true });
+    this.enableRoomInput();
     scene.add.existing(this);
   }
 
@@ -106,7 +106,7 @@ export class Room extends Phaser.GameObjects.Container {
       this.bg.setSize(92, 38);
       this.bg.setFillStyle(color, this.evolvedFusion ? 1 : 0.92).setStrokeStyle(this.evolvedFusion ? 5 : 4, this.evolvedFusion ? 0xffe28a : 0xffffff, 1);
       this.disableInteractive();
-      this.setInteractive({ useHandCursor: true });
+      this.enableRoomInput();
     } else if (role === 'contributor') {
       this.setPosition(mergedX, mergedY);
       this.setAlpha(0);
@@ -126,7 +126,7 @@ export class Room extends Phaser.GameObjects.Container {
       this.bg.setSize(92, 38);
       this.bg.setFillStyle(this.def.color, 0.88).setStrokeStyle(this.level >= 3 ? 4 : this.level === 2 ? 3 : 2, this.level >= 3 ? 0xffffff : 0xfff0bd, 0.9);
       this.disableInteractive();
-      this.setInteractive({ useHandCursor: true });
+      this.enableRoomInput();
     }
   }
 
@@ -296,6 +296,14 @@ export class Room extends Phaser.GameObjects.Container {
       ease: 'Sine.easeInOut',
     });
     return c;
+  }
+
+  private enableRoomInput() {
+    this.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(-46, -19, 92, 38),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      useHandCursor: true,
+    });
   }
 
   private pulse(target: Phaser.GameObjects.GameObject, scale: number, duration: number) {
