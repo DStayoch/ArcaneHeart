@@ -13,11 +13,8 @@ export class BuildSlot extends Phaser.GameObjects.Container {
     this.label = scene.add.text(0, 0, '+', { fontSize: '22px', color: '#eadcff' }).setOrigin(0.5);
     this.add([this.bg, this.label]);
     this.setSize(92, 38);
-    this.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(-46, -19, 92, 38),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      useHandCursor: true,
-    });
+    this.setInteractive(new Phaser.Geom.Rectangle(-46, -19, 92, 38), Phaser.Geom.Rectangle.Contains);
+    this.input!.cursor = 'pointer';
     scene.add.existing(this);
   }
 

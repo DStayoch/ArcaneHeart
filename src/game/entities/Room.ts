@@ -299,11 +299,8 @@ export class Room extends Phaser.GameObjects.Container {
   }
 
   private enableRoomInput() {
-    this.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(-46, -19, 92, 38),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      useHandCursor: true,
-    });
+    this.setInteractive(new Phaser.Geom.Rectangle(-46, -19, 92, 38), Phaser.Geom.Rectangle.Contains);
+    this.input!.cursor = 'pointer';
   }
 
   private pulse(target: Phaser.GameObjects.GameObject, scale: number, duration: number) {

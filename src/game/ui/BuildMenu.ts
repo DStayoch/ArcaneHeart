@@ -10,6 +10,7 @@ export class BuildMenu extends Phaser.GameObjects.Container {
     card: Phaser.GameObjects.Container;
     bg: Phaser.GameObjects.Rectangle;
     text: Phaser.GameObjects.Text;
+    hit: Phaser.GameObjects.Zone;
     cost: number;
   }> = [];
   private title: Phaser.GameObjects.Text;
@@ -29,24 +30,20 @@ export class BuildMenu extends Phaser.GameObjects.Container {
       const affordable = () => this.gameState.mana >= room.cost;
       const bg = scene.add.rectangle(0, 0, 274, 46, room.color, 0.8).setOrigin(0).setStrokeStyle(1, 0xffe6a6, 0.7);
       const text = scene.add.text(10, 6, `${room.icon} ${room.name} - ${room.cost} Mana\n${tagsText(room.tags)}`, { fontSize: '12px', color: '#140d19' });
-      card.add([bg, text]);
-      card.setSize(274, 46).setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(0, 0, 274, 46),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-        useHandCursor: true,
-      });
-      card.on('pointerdown', () => {
+      const hit = scene.add.zone(0, 0, 274, 46).setOrigin(0).setInteractive({ useHandCursor: true });
+      card.add([bg, text, hit]);
+      hit.on('pointerdown', () => {
         if (this.activeSlot && affordable()) this.onBuild?.(this.activeSlot, room.id);
       });
-      card.on('pointerover', () => {
+      hit.on('pointerover', () => {
         bg.setAlpha(affordable() ? 1 : 0.42);
         this.onHover?.(340, 86 + index * 54, `${room.name}\n${room.effect}\n${room.personality}\nCombo hints: try ${room.tags.includes('Fire') ? 'Mirror Hatchery or Cauldron Nursery' : room.tags.includes('Root') ? 'Moon Bell or Clockwork Orrery' : 'adjacent Noun/Verb/Modifier rooms'}.`);
       });
-      card.on('pointerout', () => {
+      hit.on('pointerout', () => {
         bg.setAlpha(affordable() ? 0.8 : 0.34);
         this.onOut?.();
       });
-      this.cards.push({ card, bg, text, cost: room.cost });
+      this.cards.push({ card, bg, text, hit, cost: room.cost });
       this.add(card);
     });
     this.setDepth(200).setVisible(false);
