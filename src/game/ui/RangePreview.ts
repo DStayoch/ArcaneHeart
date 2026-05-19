@@ -10,7 +10,7 @@ export class RangePreview {
 
   show(room: Room) {
     this.circle.setPosition(room.x, room.y);
-    this.circle.setRadius(room.range());
+    this.circle.setRadius(room.previewRange());
     this.circle.setVisible(true);
     this.scene.tweens.add({ targets: this.circle, alpha: 0.14, duration: 180, yoyo: true });
   }

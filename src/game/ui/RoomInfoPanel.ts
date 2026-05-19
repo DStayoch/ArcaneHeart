@@ -7,6 +7,8 @@ const priorities: TargetPriority[] = ['first', 'last', 'strongest', 'weakest', '
 
 export class RoomInfoPanel extends Phaser.GameObjects.Container {
   private copy: Phaser.GameObjects.Text;
+  private economyText: Phaser.GameObjects.Text;
+  private targetText: Phaser.GameObjects.Text;
   private room?: Room;
   private signature = '__unrendered__';
   onUpgrade?: (room: Room) => void;
@@ -20,12 +22,14 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
     super(scene, 918, 360);
     const panel = scene.add.rectangle(0, 0, 330, 246, 0x120b19, 0.93).setOrigin(0).setStrokeStyle(2, 0x8d6ea7);
     const hoverZone = scene.add.zone(0, 0, 330, 246).setOrigin(0).setInteractive();
-    this.copy = scene.add.text(14, 14, 'Select a room for upgrades.', { fontSize: '13px', color: '#fff0cf', wordWrap: { width: 300 }, lineSpacing: 3 });
-    const upgrade = this.button(14, 166, 'Upgrade');
-    const sell = this.button(118, 166, 'Sell');
-    const target = this.button(200, 166, 'Target');
-    const focus = this.button(250, 166, 'Focus');
-    this.evolveButton = this.button(14, 204, 'Evolve Fusion');
+    this.copy = scene.add.text(14, 14, 'Select a room for upgrades.', { fontSize: '12px', color: '#fff0cf', wordWrap: { width: 300 }, lineSpacing: 2 });
+    this.economyText = scene.add.text(14, 150, '', { fontSize: '12px', color: '#ffe29a' });
+    this.targetText = scene.add.text(176, 150, '', { fontSize: '12px', color: '#bdf4ff' });
+    const upgrade = this.button(14, 170, 'Upgrade');
+    const sell = this.button(118, 170, 'Sell');
+    const target = this.button(200, 170, 'Target');
+    const focus = this.button(250, 170, 'Focus');
+    this.evolveButton = this.button(14, 208, 'Evolve Fusion');
     upgrade.on('pointerdown', () => this.room && this.onUpgrade?.(this.room));
     sell.on('pointerdown', () => this.room && this.onSell?.(this.room));
     focus.on('pointerdown', () => this.room && this.onFocus?.(this.room));
@@ -38,7 +42,7 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
     });
     hoverZone.on('pointerover', () => this.onHoverChange?.(true));
     hoverZone.on('pointerout', () => this.onHoverChange?.(false));
-    this.add([panel, hoverZone, this.copy, upgrade, sell, target, focus, this.evolveButton]);
+    this.add([panel, hoverZone, this.copy, this.economyText, this.targetText, upgrade, sell, target, focus, this.evolveButton]);
     this.setDepth(220);
     this.setSize(330, 246);
     this.setVisible(false);
@@ -51,6 +55,8 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
       if (this.signature === 'empty') return;
       this.signature = 'empty';
       this.copy.setText('Select a room for upgrades.');
+      this.economyText.setText('');
+      this.targetText.setText('');
       return;
     }
     const signature = `${room.id}:${room.level}:${room.priority}:${room.upgradeFocus}:${room.activeFusion?.id ?? ''}:${room.mergedInto ?? ''}:${room.evolvedFusion}`;
@@ -60,7 +66,9 @@ export class RoomInfoPanel extends Phaser.GameObjects.Container {
       ? `\nFusion: ${room.evolvedFusion ? room.evolutionTitle() : room.fusedCombo.name}\nEssence: ${room.evolvedFusion ? 'EVOLVED' : `${room.evolutionCost()} to evolve`}`
       : '';
     this.evolveButton.setAlpha(room.canEvolve() ? 1 : 0.38);
-    this.copy.setText(`${room.def.name}   Level ${room.level}\n${tagsText(room.def.tags)}\nDamage ${Math.round(room.damage())}  Range ${Math.round(room.range())}\nFocus: ${room.upgradeFocus}\n${room.def.effect}${fusionText}\nUpgrade ${room.level >= 3 ? 'MAX' : `${room.upgradeCost()} Mana`}   Sell ${room.sellValue()} Mana\nTargeting: ${room.priority}`);
+    this.copy.setText(`${room.def.name}   Level ${room.level}\n${tagsText(room.def.tags)}\nDamage ${Math.round(room.damage())}  Range ${Math.round(room.previewRange())}\nFocus: ${room.upgradeFocus}\n${room.def.effect}${fusionText}`);
+    this.economyText.setText(`Upgrade ${room.level >= 3 ? 'MAX' : `${room.upgradeCost()} Mana`}   Sell ${room.sellValue()}`);
+    this.targetText.setText(`Target: ${room.priority}`);
   }
 
   private button(x: number, y: number, label: string) {

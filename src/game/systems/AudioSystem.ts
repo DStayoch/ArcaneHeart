@@ -2,10 +2,13 @@ import Phaser from 'phaser';
 import type { RoomId } from '../core/types';
 
 export type AudioCue = 'build' | 'sell' | 'hit' | 'damage' | 'death' | 'combo' | 'wave' | 'boss' | 'win' | 'loss';
+export type VolumeLevel = 'Muted' | 'Half' | 'Full';
 
 export class AudioSystem {
   private ctx?: AudioContext;
+  private masterGain?: GainNode;
   private lastRoomSound = new Map<string, number>();
+  private volume: VolumeLevel = 'Full';
 
   constructor(private scene: Phaser.Scene) {}
 
@@ -14,6 +17,16 @@ export class AudioSystem {
     if (!this.ctx) return;
     void this.ctx.resume();
     this.magicSweep(this.ctx.currentTime, 420, 820, 0.18, 0.025);
+  }
+
+  cycleVolume() {
+    this.volume = this.volume === 'Full' ? 'Half' : this.volume === 'Half' ? 'Muted' : 'Full';
+    this.applyVolume();
+    return this.volume;
+  }
+
+  volumeLabel() {
+    return this.volume;
   }
 
   play(cue: AudioCue) {
@@ -100,8 +113,19 @@ export class AudioSystem {
   private ensureContext() {
     const AudioContextCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextCtor) return;
-    this.ctx ??= new AudioContextCtor();
+    if (!this.ctx) {
+      this.ctx = new AudioContextCtor();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.connect(this.ctx.destination);
+      this.applyVolume();
+    }
     if (this.ctx.state === 'suspended') void this.ctx.resume();
+  }
+
+  private applyVolume() {
+    if (!this.ctx || !this.masterGain) return;
+    const gain = this.volume === 'Full' ? 1 : this.volume === 'Half' ? 0.5 : 0.0001;
+    this.masterGain.gain.setTargetAtTime(gain, this.ctx.currentTime, 0.015);
   }
 
   private chime(frequencies: number[], start: number, type: OscillatorType, gainValue: number, step = 0.075) {
@@ -115,7 +139,7 @@ export class AudioSystem {
       gain.gain.setValueAtTime(0.0001, t);
       gain.gain.exponentialRampToValueAtTime(gainValue, t + 0.015);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-      osc.connect(gain).connect(this.ctx!.destination);
+      osc.connect(gain).connect(this.masterGain ?? this.ctx!.destination);
       osc.start(t);
       osc.stop(t + 0.2);
     });
@@ -134,7 +158,7 @@ export class AudioSystem {
     gain.gain.setValueAtTime(gainValue, start);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.12);
     source.buffer = buffer;
-    source.connect(filter).connect(gain).connect(this.ctx.destination);
+    source.connect(filter).connect(gain).connect(this.masterGain ?? this.ctx.destination);
     source.start(start);
   }
 
@@ -156,7 +180,7 @@ export class AudioSystem {
     gain.gain.setValueAtTime(0.0001, start);
     gain.gain.exponentialRampToValueAtTime(gainValue, start + 0.035);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-    osc.connect(filter).connect(gain).connect(this.ctx.destination);
+    osc.connect(filter).connect(gain).connect(this.masterGain ?? this.ctx.destination);
     osc.start(start);
     osc.stop(start + duration + 0.02);
   }
@@ -170,7 +194,7 @@ export class AudioSystem {
     osc.frequency.exponentialRampToValueAtTime(Math.max(35, frequency * 0.45), start + 0.18);
     gain.gain.setValueAtTime(gainValue, start);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.2);
-    osc.connect(gain).connect(this.ctx.destination);
+    osc.connect(gain).connect(this.masterGain ?? this.ctx.destination);
     osc.start(start);
     osc.stop(start + 0.22);
   }

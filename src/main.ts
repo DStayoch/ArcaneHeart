@@ -7,7 +7,8 @@ import { GameScene } from './game/scenes/GameScene';
 import { UIScene } from './game/scenes/UIScene';
 import { GameOverScene } from './game/scenes/GameOverScene';
 
-const renderZoom = Math.min(window.devicePixelRatio || 1, 2);
+const fittedScale = Math.min(window.innerWidth / GAME_WIDTH, window.innerHeight / GAME_HEIGHT);
+const renderZoom = Math.min(Math.max(window.devicePixelRatio || 1, fittedScale), 3);
 
 new Phaser.Game({
   type: Phaser.AUTO,

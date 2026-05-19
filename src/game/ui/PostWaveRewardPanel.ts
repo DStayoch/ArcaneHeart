@@ -10,7 +10,7 @@ interface RewardCard {
 }
 
 const rewards: RewardCard[] = [
-  { id: 'mana', title: 'Mana Windfall', body: '+80 Mana for immediate rebuilding.', color: 0x77f0c2 },
+  { id: 'mana', title: 'Mana Windfall', body: '+55 Mana for immediate rebuilding.', color: 0x77f0c2 },
   { id: 'essence', title: 'Essence Shard', body: '+2 Essence for fusion evolution.', color: 0xd8c0ff },
   { id: 'heart', title: 'Heart Stitch', body: 'Restore 4 Arcane Heart HP.', color: 0xff9bb9 },
   { id: 'mutation', title: 'Tower Dream', body: 'Choose an extra tower mood now.', color: 0xffdf8f },

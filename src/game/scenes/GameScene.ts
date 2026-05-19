@@ -190,6 +190,7 @@ export class GameScene extends Phaser.Scene {
     this.rewardPanel.onChoose = (reward) => this.applyPostWaveReward(reward);
     this.escapeMenu.onResume = () => this.closeEscapeMenu();
     this.escapeMenu.onStartScreen = () => this.scene.start('MenuScene');
+    this.escapeMenu.onVolumeCycle = () => this.audio.cycleVolume();
   }
 
   private wireInput() {
@@ -287,7 +288,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.state.wave += 1;
-    this.economy.addMana(18 + this.state.wave * 2);
+    this.economy.addMana(10 + this.state.wave);
     const shouldReward = (this.state.wave - 1) % 3 === 0;
     this.pendingMutationAfterReward = (this.state.wave - 1) % 2 === 0;
     if (shouldReward) {
@@ -354,6 +355,7 @@ export class GameScene extends Phaser.Scene {
     this.buildMenu.close();
     this.rangePreview.hide();
     this.escapeMenu.open(this.state.unlockedComboIds, this.build.rooms.map((room) => room.def.id));
+    this.escapeMenu.setVolumeLabel(this.audio.volumeLabel());
     this.refreshUi();
   }
 
@@ -371,7 +373,7 @@ export class GameScene extends Phaser.Scene {
 
   private applyPostWaveReward(reward: PostWaveReward) {
     this.rewardPanel.hidePanel();
-    if (reward === 'mana') this.economy.addMana(80);
+    if (reward === 'mana') this.economy.addMana(55);
     if (reward === 'essence') this.economy.addEssence(2);
     if (reward === 'heart') this.state.heartHp = Math.min(20, this.state.heartHp + 4);
     if (reward === 'mutation') {

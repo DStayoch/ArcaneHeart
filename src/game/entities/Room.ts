@@ -58,10 +58,17 @@ export class Room extends Phaser.GameObjects.Container {
     return this.def.range * (this.def.tags.includes('Storm') || this.def.tags.includes('Moon') ? 1.03 : 1) * focusBoost;
   }
 
+  previewRange() {
+    if (this.activeFusion?.id === 'solar_orchard') return this.range() + (this.evolvedFusion ? 130 : 70);
+    if (this.activeFusion?.id === 'funeral_chime') return this.range() + (this.evolvedFusion ? 85 : 35);
+    return this.range();
+  }
+
   cooldown() {
     const supportBoost = this.level === 3 ? 0.86 : 1;
     const focusBoost = this.upgradeFocus === 'Reach' ? 0.94 : 1;
-    return this.def.cooldownMs * supportBoost * (this.evolvedFusion ? 0.84 : 1) * focusBoost;
+    const fusionTax = this.activeFusion ? (this.evolvedFusion ? 1.08 : 1.18) : 1;
+    return this.def.cooldownMs * supportBoost * (this.evolvedFusion ? 0.84 : 1) * focusBoost * fusionTax;
   }
 
   upgradeCost() {

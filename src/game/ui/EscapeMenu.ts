@@ -1,12 +1,15 @@
 import Phaser from 'phaser';
 import { comboDefinitions } from '../data/combos';
 import { roomDefinitions } from '../data/rooms';
+import type { VolumeLevel } from '../systems/AudioSystem';
 
 export class EscapeMenu extends Phaser.GameObjects.Container {
   private comboRows: Phaser.GameObjects.GameObject[] = [];
   private quitMessage: Phaser.GameObjects.Text;
+  private volumeButton: Phaser.GameObjects.Text;
   onResume?: () => void;
   onStartScreen?: () => void;
+  onVolumeCycle?: () => VolumeLevel;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
@@ -19,13 +22,18 @@ export class EscapeMenu extends Phaser.GameObjects.Container {
     const resume = this.button(350, 602, 'Resume');
     const start = this.button(474, 602, 'Start Screen');
     const quit = this.button(632, 602, 'Quit');
+    this.volumeButton = this.button(724, 602, 'Volume Full');
     this.quitMessage = scene.add.text(350, 650, '', { fontSize: '12px', color: '#d8c0ff', wordWrap: { width: 570 } });
 
     resume.on('pointerdown', () => this.onResume?.());
     start.on('pointerdown', () => this.onStartScreen?.());
     quit.on('pointerdown', () => this.quitGame());
+    this.volumeButton.on('pointerdown', () => {
+      const volume = this.onVolumeCycle?.();
+      if (volume) this.setVolumeLabel(volume);
+    });
 
-    this.add([veil, glow, panel, title, subtitle, comboTitle, resume, start, quit, this.quitMessage]);
+    this.add([veil, glow, panel, title, subtitle, comboTitle, resume, start, quit, this.volumeButton, this.quitMessage]);
     this.setDepth(900).setVisible(false);
     scene.add.existing(this);
   }
@@ -34,6 +42,10 @@ export class EscapeMenu extends Phaser.GameObjects.Container {
     this.renderCombos(unlockedComboIds, builtRoomIds);
     this.quitMessage.setText('');
     this.setVisible(true);
+  }
+
+  setVolumeLabel(volume: VolumeLevel) {
+    this.volumeButton.setText(`Volume ${volume}`);
   }
 
   closePanel() {

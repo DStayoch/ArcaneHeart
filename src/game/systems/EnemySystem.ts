@@ -18,9 +18,11 @@ export class EnemySystem {
   }
 
   spawn(enemyId: EnemyId, elite = false) {
-    const healthScale = 1 + Math.max(0, this.state.wave - 1) * 0.13;
-    const speedScale = 1 + Math.max(0, this.state.wave - 1) * 0.024;
-    const armorScale = Math.max(0, this.state.wave - 1) * 0.35;
+    const wavePressure = Math.max(0, this.state.wave - 1);
+    const latePressure = Math.max(0, this.state.wave - 10);
+    const healthScale = 1 + wavePressure * 0.16 + latePressure * 0.035;
+    const speedScale = 1 + wavePressure * 0.028;
+    const armorScale = wavePressure * 0.45 + latePressure * 0.2;
     const enemy = new Enemy(this.scene, enemyId, this.path, elite, healthScale, speedScale, armorScale);
     if (this.spawnedThisWave === 0 && this.mutations.has('cellar_teeth')) enemy.applyStatus('snared', 2200, 0.32);
     if (this.mutations.has('stairs_rearrange')) enemy.applyStatus('dazed', 1200, 0.08);
@@ -43,7 +45,9 @@ export class EnemySystem {
 
   private kill(enemy: Enemy) {
     enemy.alive = false;
-    const manaReward = enemy.def.rewardMana + (this.mutations.has('gets_hungry') && enemy.currentFloor() >= 7 ? 1 : 0);
+    const rewardScale = Math.max(0.52, 0.82 - Math.max(0, this.state.wave - 1) * 0.018);
+    const baseReward = enemy.def.rewardMana + (this.mutations.has('gets_hungry') && enemy.currentFloor() >= 7 ? 1 : 0);
+    const manaReward = Math.max(1, baseReward * rewardScale);
     this.economy.addMana(manaReward);
     this.economy.addEssence(enemy.def.rewardEssence ?? 0);
     this.fx?.enemyKilled(enemy, manaReward);

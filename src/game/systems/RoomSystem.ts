@@ -39,7 +39,7 @@ export class RoomSystem {
     }
     if (room.def.id === 'cauldron_nursery') {
       if (!this.state.waveActive) return;
-      this.economy.addMana(room.level >= 3 ? 8 : 4);
+      this.economy.addMana(room.level >= 3 ? 6 : 3);
       this.audio?.playRoom(room.def.id);
       return;
     }
@@ -63,7 +63,7 @@ export class RoomSystem {
     this.projectiles.fire(room, target, room.damage(), this.state.activeCombos);
     this.statuses.applyRoomEffects(room, target, this.state.activeCombos);
     this.audio?.playRoom(room.def.id);
-    if (this.state.activeCombos.some((combo) => combo.id === 'spicy_stew_economy') && room.def.id === 'fire_imp_kitchen' && chance(0.2)) this.economy.addMana(2);
+    if (this.state.activeCombos.some((combo) => combo.id === 'spicy_stew_economy') && room.def.id === 'fire_imp_kitchen' && chance(0.16)) this.economy.addMana(1);
   }
 
   private actFusion(room: Room, enemies: Enemy[]) {
@@ -140,13 +140,13 @@ export class RoomSystem {
         return;
       }
       case 'spicy_stew_economy': {
-        if (this.state.waveActive) this.economy.addMana(evolved ? room.level >= 3 ? 16 : 11 : room.level >= 3 ? 10 : 6);
+        if (this.state.waveActive) this.economy.addMana(evolved ? room.level >= 3 ? 11 : 8 : room.level >= 3 ? 7 : 4);
         if (target) {
           target.applyDamage(room.damage() * (evolved ? 1.22 : 0.95) + (evolved ? 16 : 6), ['Fire', 'Alchemy'], room.id);
           const victims = this.targeting.nearbyEnemies(target, enemies, evolved ? 130 : 85);
           victims.forEach((enemy) => {
             enemy.applyStatus('burning', evolved ? 4200 : 2800, evolved ? 9 : 6);
-            if (evolved && chance(0.28)) this.economy.addMana(1);
+            if (evolved && chance(0.18)) this.economy.addMana(1);
           });
           this.fx?.fusionCast(fusion.id, room, [target, ...victims]);
           this.audio?.play('damage');
